@@ -1,0 +1,50 @@
+# Compiled source #
+###################
+*.dcu
+*.obj
+*.exe
+*.bpl
+*.bpi
+*.dcp
+*.rsm
+*.stat
+*.map
+
+# Backup files    #
+###################
+*.~*
+
+# IDE Files	  #
+###################
+*.dproj.local
+*.groupproj.local
+*.identcache
+*.dsk
+*.tvsconfig
+*.otares
+*.drc
+*.rc
+*.res
+*.mes
+
+# Output Folders  #
+###################
+/Win32
+/Win64
+/__history
+/Tests/Win32
+/Tests/Win64
+/Test/__history
+Sample/__history
+Sample/Win32/
+Sample/Win64/
+
+
+# Testing Output  #
+###################
+Tests/dunit-report.xml
+Tests/dunitx-results.xml
+Examples/dunitx-results.xml
+*.fb7lck
+*.fbl7
+*.fbpInf

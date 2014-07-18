@@ -1,0 +1,48 @@
+﻿	<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+		<PropertyGroup>
+			<ProjectGuid>{E17630B3-C733-4ABF-A256-0426AFD56248}</ProjectGuid>
+		</PropertyGroup>
+		<ItemGroup>
+			<Projects Include="Tests\CommandParserTests_XE2.dproj">
+				<Dependencies/>
+			</Projects>
+			<Projects Include="Sample\Sample.dproj">
+				<Dependencies/>
+			</Projects>
+		</ItemGroup>
+		<ProjectExtensions>
+			<Borland.Personality>Default.Personality.12</Borland.Personality>
+			<Borland.ProjectType/>
+			<BorlandProject>
+				<Default.Personality/>
+			</BorlandProject>
+		</ProjectExtensions>
+		<Target Name="CommandParserTests_XE2">
+			<MSBuild Projects="Tests\CommandParserTests_XE2.dproj"/>
+		</Target>
+		<Target Name="CommandParserTests_XE2:Clean">
+			<MSBuild Targets="Clean" Projects="Tests\CommandParserTests_XE2.dproj"/>
+		</Target>
+		<Target Name="CommandParserTests_XE2:Make">
+			<MSBuild Targets="Make" Projects="Tests\CommandParserTests_XE2.dproj"/>
+		</Target>
+		<Target Name="Sample">
+			<MSBuild Projects="Sample\Sample.dproj"/>
+		</Target>
+		<Target Name="Sample:Clean">
+			<MSBuild Targets="Clean" Projects="Sample\Sample.dproj"/>
+		</Target>
+		<Target Name="Sample:Make">
+			<MSBuild Targets="Make" Projects="Sample\Sample.dproj"/>
+		</Target>
+		<Target Name="Build">
+			<CallTarget Targets="CommandParserTests_XE2;Sample"/>
+		</Target>
+		<Target Name="Clean">
+			<CallTarget Targets="CommandParserTests_XE2:Clean;Sample:Clean"/>
+		</Target>
+		<Target Name="Make">
+			<CallTarget Targets="CommandParserTests_XE2:Make;Sample:Make"/>
+		</Target>
+		<Import Condition="Exists('$(BDS)\Bin\CodeGear.Group.Targets')" Project="$(BDS)\Bin\CodeGear.Group.Targets"/>
+	</Project>
