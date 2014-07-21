@@ -68,6 +68,7 @@ type
     function GetIsOptionFile: Boolean;
     function GetIsUnnamed: Boolean;
 
+
     procedure SetIsOptionFile(const value: Boolean);
     procedure SetAllowMultiple(const value: Boolean);
     procedure SetHasValue(const value: Boolean);
@@ -85,14 +86,41 @@ type
     constructor Create(const longName : string; const shortName : string; const helpText : string; const proc : TProc<T>);overload;
   end;
 
+//in interface so we can unit test them
+const
+  trueStrings:  array[0..10] of string = ('True' ,'T','+','Yes','Y','On' ,'Enable', 'Enabled' , '1','-1', '');
+  falseStrings: array[0..8] of string = ('False','F','-','No' ,'N','Off','Disable','Disabled', '0');
+
+function StringToBoolean(const value: string): boolean;
 
 implementation
 
+uses
+  System.StrUtils;
+
 { TOptionDefinition<T> }
+
+
+
+function StringToBoolean(const value: string): boolean;
+begin
+  if  MatchText(value, trueStrings) then
+    result := true
+  else if MatchText(value,falseStrings) then
+    result := false
+  else
+    raise Exception.Create('Invalid value, not boolean');
+
+end;
+
+
 
 constructor TOptionDefinition<T>.Create(const longName, shortName: string; const proc: TProc<T>);
 begin
   FTypeInfo := TypeInfo(T);
+  if not (FTypeInfo.Kind in [tkInteger,tkEnumeration,tkFloat,tkString,tkSet,tkLString,tkWString,tkInt64,tkUString]) then
+    raise Exception.Create('Invalid Option type - only string, integer, float, boolean, enum and sets are supported');
+
   FLongName := longName;
   FShortName := shortName;
   FHasValue := true;
@@ -169,17 +197,67 @@ begin
 
 end;
 
+
+//Note : Using TValue.FromVariant as TValue.From<T>
 procedure TOptionDefinition<T>.Invoke(const value: string);
 var
   v : TValue;
+  intVal : integer;
+  int64Val : Int64;
+  floatVal : Double;
+  PTemp: Pointer;
 begin
   FWasFound := True;
   if Assigned(FProc) then
   begin
     if value <> '' then
     begin
-      v := TValue.FromVariant(value);
-      //TODO : really need to convert the type here!
+      //there must be a cleaner way to do this, TValue still fails at the most basic conversions.
+      case FTypeInfo.Kind of
+        tkInteger :
+        begin
+          intVal := StrToInt(value);
+          v := TValue.From<Integer>(intVal) ;
+        end;
+        tkInt64 :
+        begin
+          int64Val := StrToInt64(value);
+          v := TValue.From<Int64>(int64Val) ;
+        end;
+        tkString, tkLString,tkWString,tkUString :
+        begin
+          v := TValue.From<string>(value);
+        end;
+        tkSet :
+        begin
+          intVal := StringToSet(FTypeInfo, value);
+          PTemp := @intVal;
+          v := TValue.From<T>(T(PTemp^));
+        end;
+        tkEnumeration :
+        begin
+          if FTypeInfo.Name = 'Boolean' then
+          begin
+            v := TValue.From<Boolean>(StringToBoolean(value));
+          end
+          else
+          begin
+            intVal := GetEnumValue(FTypeInfo,value);
+            if intVal < 0 then
+              raise Exception.Create('Invalid Enum Value : ' + value);
+
+            v := TValue.FromOrdinal(FTypeInfo,intVal);
+          end;
+        end;
+        tkFloat :
+        begin
+           floatVal := StrToFloat(value);
+           v := TValue.From<Double>(floatVal);
+        end;
+      else
+        raise Exception.Create('invalid option type');
+        //what?
+      end;
       FProc(v.AsType<T>);
     end
     else

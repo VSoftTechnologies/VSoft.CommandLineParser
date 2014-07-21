@@ -33,6 +33,10 @@ uses
   DUnitX.CommandLine.Parser;
 
 type
+  TExampleEnum = (enOne,enTwo,enThree);
+
+  TExampleSet = set of TExampleEnum;
+
   [TestFixture]
   TCommandLineParserTests = class
   public
@@ -76,6 +80,18 @@ type
   [Test]
   procedure Will_Raise_For_Missing_Param_File;
 
+  [Test]
+  procedure Can_Parse_Enum_Parameter;
+
+  [Test]
+  procedure Will_Generate_Error_For_Invalid_Enum;
+
+  [Test]
+  procedure Can_Parse_Set_Parameter;
+
+  [Test]
+  procedure Will_Generate_Error_For_Invalid_Set;
+
   end;
 
 implementation
@@ -85,6 +101,31 @@ uses
   DUnitX.CommandLine.OptionDef;
 
 { TCommandLineParserTests }
+
+procedure TCommandLineParserTests.Can_Parse_Enum_Parameter;
+var
+  def : IOptionDefintion;
+  test : TExampleEnum;
+  sList : TStringList;
+  parseResult : ICommandLineParseResult;
+
+begin
+  def := TOptionsRegistry.RegisterOption<TExampleEnum>('test','t',
+                  procedure(value : TExampleEnum)
+                  begin
+                    test := value;
+                  end);
+
+  sList := TStringList.Create;
+  sList.Add('--test:enTwo');
+  try
+    parseResult := TOptionsRegistry.Parse(sList);
+  finally
+    sList.Free;
+  end;
+  Assert.IsFalse(parseResult.HasErrors);
+  Assert.AreEqual<TExampleEnum>(enTwo,test);
+end;
 
 procedure TCommandLineParserTests.Can_Parse_Multiple_Unnamed_Parameters;
 var
@@ -158,6 +199,31 @@ begin
   end;
   Assert.AreEqual('hello world',test);
   Assert.AreEqual('hello world',test2);
+end;
+
+procedure TCommandLineParserTests.Can_Parse_Set_Parameter;
+var
+  def : IOptionDefintion;
+  test : TExampleSet;
+  sList : TStringList;
+  parseResult : ICommandLineParseResult;
+
+begin
+  def := TOptionsRegistry.RegisterOption<TExampleSet>('test','t',
+                  procedure(value : TExampleSet)
+                  begin
+                    test := value;
+                  end);
+
+  sList := TStringList.Create;
+  sList.Add('--test:[enOne,enThree]');
+  try
+    parseResult := TOptionsRegistry.Parse(sList);
+  finally
+    sList.Free;
+  end;
+  Assert.IsFalse(parseResult.HasErrors);
+  Assert.AreEqual<TExampleSet>(test,[enOne,enThree]);
 end;
 
 procedure TCommandLineParserTests.Can_Parse_Unnamed_Parameter;
@@ -386,6 +452,57 @@ begin
                         end);
 
     end);
+end;
+
+procedure TCommandLineParserTests.Will_Generate_Error_For_Invalid_Enum;
+var
+  def : IOptionDefintion;
+  test : TExampleEnum;
+  sList : TStringList;
+  parseResult : ICommandLineParseResult;
+
+begin
+  def := TOptionsRegistry.RegisterOption<TExampleEnum>('test','t',
+                  procedure(value : TExampleEnum)
+                  begin
+                    test := value;
+                  end);
+
+  sList := TStringList.Create;
+  sList.Add('--test:enbBlah');
+  try
+    parseResult := TOptionsRegistry.Parse(sList);
+    WriteLn(parseResult.ErrorText);
+  finally
+    sList.Free;
+  end;
+  Assert.IsTrue(parseResult.HasErrors);
+end;
+
+procedure TCommandLineParserTests.Will_Generate_Error_For_Invalid_Set;
+var
+  def : IOptionDefintion;
+  test : TExampleSet;
+  sList : TStringList;
+  parseResult : ICommandLineParseResult;
+
+begin
+  def := TOptionsRegistry.RegisterOption<TExampleSet>('test','t',
+                  procedure(value : TExampleSet)
+                  begin
+                    test := value;
+                  end);
+
+  sList := TStringList.Create;
+  sList.Add('--test:[enOne,enFoo]');
+  try
+    parseResult := TOptionsRegistry.Parse(sList);
+    WriteLn(parseResult.ErrorText);
+  finally
+    sList.Free;
+  end;
+  Assert.IsTrue(parseResult.HasErrors);
+
 end;
 
 initialization

@@ -193,11 +193,17 @@ begin
       end
       else
       begin
-        if bUseKey then
-          (option as IOptionDefInvoke).Invoke(key)
-        else
-          (option as IOptionDefInvoke).Invoke(value)
-
+        try
+          if bUseKey then
+            (option as IOptionDefInvoke).Invoke(key)
+          else
+            (option as IOptionDefInvoke).Invoke(value);
+        except
+          on e : Exception do
+          begin
+            parseErrors.AddError('Error setting option : ' + key + ' to ' + value + ' : ' + e.Message );
+          end;
+        end;
       end;
     end
     else
