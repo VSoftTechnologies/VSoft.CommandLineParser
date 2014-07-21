@@ -1,4 +1,4 @@
 DUnitX.CommandLineParser
 ========================
 
-Simple Command Line Options Parseer - part of the DUnitX Project
+Simple Command Line Options Parser - part of the DUnitX Project
