@@ -68,6 +68,8 @@ type
     procedure SetAllowMultiple(const value : boolean);
     function GetIsOptionFile : boolean;
     procedure SetIsOptionFile(const value : boolean);
+    function GetIsHidden : boolean;
+    procedure SetIsHidden(const value : boolean);
 
     function GetIsUnnamed : boolean;
     property LongName       : string read GetLongName;
@@ -78,7 +80,8 @@ type
     property ValueRequired  : boolean read GetValueRequired write SetValueRequired;
     property AllowMultiple  : boolean read GetAllowMultiple write SetAllowMultiple;
     property IsOptionFile   : boolean read GetIsOptionFile write SetIsOptionFile;
-    property IsUnnamed       : boolean read GetIsUnnamed;
+    property IsUnnamed      : boolean read GetIsUnnamed;
+    property Hidden         : boolean read GetIsHidden write SetIsHidden;
   end;
 
 
@@ -179,6 +182,8 @@ begin
   //TODO : Improve formatting!
   for option in AllRegisteredOptions do
   begin
+    if option.Hidden then
+      continue;
     helpString := '--' + option.LongName;
     if option.HasValue then
       helpString := helpString + ':value';

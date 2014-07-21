@@ -57,6 +57,7 @@ type
     FWasFound       : boolean;
     FTypeInfo       : PTypeInfo;
     FDefault        : T;
+    FHidden         : boolean;
   protected
     function GetAllowMultiple: Boolean;
     function GetHasValue: Boolean;
@@ -67,8 +68,9 @@ type
     function GetValueRequired: Boolean;
     function GetIsOptionFile: Boolean;
     function GetIsUnnamed: Boolean;
+    function GetIsHidden: Boolean;
 
-
+    procedure SetIsHidden(const value: Boolean);
     procedure SetIsOptionFile(const value: Boolean);
     procedure SetAllowMultiple(const value: Boolean);
     procedure SetHasValue(const value: Boolean);
@@ -84,6 +86,7 @@ type
   public
     constructor Create(const longName : string; const shortName : string; const proc : TProc<T>);overload;
     constructor Create(const longName : string; const shortName : string; const helpText : string; const proc : TProc<T>);overload;
+
   end;
 
 //in interface so we can unit test them
@@ -147,6 +150,11 @@ end;
 function TOptionDefinition<T>.GetHelpText: string;
 begin
   result := FHelpText;
+end;
+
+function TOptionDefinition<T>.GetIsHidden: Boolean;
+begin
+  result := FHidden;
 end;
 
 function TOptionDefinition<T>.GetIsOptionFile: Boolean;
@@ -281,6 +289,11 @@ end;
 procedure TOptionDefinition<T>.SetHelpText(const value: string);
 begin
   FHelpText := value;
+end;
+
+procedure TOptionDefinition<T>.SetIsHidden(const value: Boolean);
+begin
+  FHidden := value;
 end;
 
 procedure TOptionDefinition<T>.SetIsOptionFile(const value: Boolean);
