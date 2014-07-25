@@ -76,9 +76,9 @@
 			<DelphiCompile Include="$(MainSource)">
 				<MainSource>MainSource</MainSource>
 			</DelphiCompile>
-			<DCCReference Include="..\Src\DUnitX.CommandLine.OptionDef.pas"/>
-			<DCCReference Include="..\Src\DUnitX.CommandLine.Options.pas"/>
-			<DCCReference Include="..\Src\DUnitX.CommandLine.Parser.pas"/>
+			<DCCReference Include="..\Src\VSoft.CommandLine.OptionDef.pas"/>
+			<DCCReference Include="..\Src\VSoft.CommandLine.Options.pas"/>
+			<DCCReference Include="..\Src\VSoft.CommandLine.Parser.pas"/>
 			<DCCReference Include="uSampleConfig.pas"/>
 			<DCCReference Include="uSampleOptions.pas"/>
 			<BuildConfiguration Include="Release">

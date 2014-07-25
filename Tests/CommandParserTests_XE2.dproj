@@ -53,7 +53,6 @@
 		<PropertyGroup Condition="'$(Base_Win32)'!=''">
 			<DCC_Namespace>Winapi;System.Win;Data.Win;Datasnap.Win;Web.Win;Soap.Win;Xml.Win;Bde;$(DCC_Namespace)</DCC_Namespace>
 			<VerInfo_Locale>1033</VerInfo_Locale>
-			<DCC_UsePackage>madBasic_;FBMiscComponents;IndyCore160;RaizeComponentsVclDb;dwWin7Controls;IndyProtocols160;FrameViewerXE2;RaizeComponentsVcl;inetdbbde;FBDreamRuntime;madDisAsm_;svnui;SynEdit_RXE2;vclimg;fmi;NxCommonRun;vclactnband;vcldb;VSPageR;FBFormDesigner;bindcompvcl;addict4_d16;vclie;madExcept_;vcltouch;websnap;DCEF_XE2;vclribbon;VclSmp;vcl;NxCommonDsgn;NxGridDsgn;IndySystem160;dsnapcon;KWizardR;FBSynEditHighlighters;vclx;NxGridRun;webdsnap;svn;lmdrtdocking;tb2k;VirtualTreesR;SpTBXLib_d16;adortl;lmdrtl;$(DCC_UsePackage)</DCC_UsePackage>
 			<VerInfo_Keys>CompanyName=;FileDescription=;FileVersion=1.0.0.0;InternalName=;LegalCopyright=;LegalTrademarks=;OriginalFilename=;ProductName=;ProductVersion=1.0.0.0;Comments=</VerInfo_Keys>
 		</PropertyGroup>
 		<PropertyGroup Condition="'$(Cfg_1)'!=''">
@@ -80,9 +79,9 @@
 				<MainSource>MainSource</MainSource>
 			</DelphiCompile>
 			<DCCReference Include="TestCommandLineParser.pas"/>
-			<DCCReference Include="..\Src\DUnitX.CommandLine.OptionDef.pas"/>
-			<DCCReference Include="..\Src\DUnitX.CommandLine.Options.pas"/>
-			<DCCReference Include="..\Src\DUnitX.CommandLine.Parser.pas"/>
+			<DCCReference Include="..\Src\VSoft.CommandLine.OptionDef.pas"/>
+			<DCCReference Include="..\Src\VSoft.CommandLine.Options.pas"/>
+			<DCCReference Include="..\Src\VSoft.CommandLine.Parser.pas"/>
 			<BuildConfiguration Include="Release">
 				<Key>Cfg_2</Key>
 				<CfgParent>Base</CfgParent>

@@ -1,7 +1,6 @@
-program Sample;
 {***************************************************************************}
 {                                                                           }
-{           DUnitX                                                          }
+{           VSoft.CommandLine                                               }
 {                                                                           }
 {           Copyright (C) 2014 Vincent Parrett                              }
 {                                                                           }
@@ -25,15 +24,17 @@ program Sample;
 {                                                                           }
 {***************************************************************************}
 
+program Sample;
+
 {$APPTYPE CONSOLE}
 
 {$R *.res}
 
 uses
   System.SysUtils,
-  DUnitX.CommandLine.OptionDef in '..\Src\DUnitX.CommandLine.OptionDef.pas',
-  DUnitX.CommandLine.Options in '..\Src\DUnitX.CommandLine.Options.pas',
-  DUnitX.CommandLine.Parser in '..\Src\DUnitX.CommandLine.Parser.pas',
+  VSoft.CommandLine.OptionDef in '..\Src\VSoft.CommandLine.OptionDef.pas',
+  VSoft.CommandLine.Options in '..\Src\VSoft.CommandLine.Options.pas',
+  VSoft.CommandLine.Parser in '..\Src\VSoft.CommandLine.Parser.pas',
   uSampleConfig in 'uSampleConfig.pas',
   uSampleOptions in 'uSampleOptions.pas';
 

@@ -1,7 +1,6 @@
-unit DUnitX.CommandLine.Parser;
 {***************************************************************************}
 {                                                                           }
-{           DUnitX                                                          }
+{           VSoft.CommandLine                                               }
 {                                                                           }
 {           Copyright (C) 2014 Vincent Parrett                              }
 {                                                                           }
@@ -25,12 +24,14 @@ unit DUnitX.CommandLine.Parser;
 {                                                                           }
 {***************************************************************************}
 
+unit VSoft.CommandLine.Parser;
+
 interface
 
 uses
   Classes,
-  DUnitX.CommandLine.Options,
-  DUnitX.CommandLine.OptionDef;
+  VSoft.CommandLine.Options,
+  VSoft.CommandLine.OptionDef;
 
 type
   IParseResultAddError = interface

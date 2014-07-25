@@ -3,15 +3,14 @@ program CommandParserTests;
 {$APPTYPE CONSOLE}
 uses
   SysUtils,
-  DUnitX.AutoDetect.Console,
   DUnitX.Loggers.Console,
   DUnitX.Loggers.Xml.NUnit,
   DUnitX.TestRunner,
   DUnitX.TestFramework,
   TestCommandLineParser in 'TestCommandLineParser.pas',
-  DUnitX.CommandLine.OptionDef in '..\Src\DUnitX.CommandLine.OptionDef.pas',
-  DUnitX.CommandLine.Options in '..\Src\DUnitX.CommandLine.Options.pas',
-  DUnitX.CommandLine.Parser in '..\Src\DUnitX.CommandLine.Parser.pas';
+  VSoft.CommandLine.OptionDef in '..\Src\VSoft.CommandLine.OptionDef.pas',
+  VSoft.CommandLine.Options in '..\Src\VSoft.CommandLine.Options.pas',
+  VSoft.CommandLine.Parser in '..\Src\VSoft.CommandLine.Parser.pas';
 
 var
   runner : ITestRunner;
@@ -20,6 +19,7 @@ var
   nunitLogger : ITestLogger;
 begin
   try
+    TDUnitX.CheckCommandLine;
     //Create the runner
     runner := TDUnitX.CreateRunner;
     runner.UseRTTI := True;

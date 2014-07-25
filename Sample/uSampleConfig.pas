@@ -1,7 +1,6 @@
-unit uSampleConfig;
 {***************************************************************************}
 {                                                                           }
-{           DUnitX                                                          }
+{           VSoft.CommandLine                                               }
 {                                                                           }
 {           Copyright (C) 2014 Vincent Parrett                              }
 {                                                                           }
@@ -25,13 +24,15 @@ unit uSampleConfig;
 {                                                                           }
 {***************************************************************************}
 
+unit uSampleConfig;
+
 interface
 
 
 implementation
 
 uses
-  DUnitX.CommandLine.Options,
+  VSoft.CommandLine.Options,
   uSampleOptions;
 
 procedure ConfigureOptions;

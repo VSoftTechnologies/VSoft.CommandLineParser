@@ -1,7 +1,6 @@
-unit DUnitX.CommandLine.Options;
 {***************************************************************************}
 {                                                                           }
-{           DUnitX                                                          }
+{           VSoft.CommandLine                                               }
 {                                                                           }
 {           Copyright (C) 2014 Vincent Parrett                              }
 {                                                                           }
@@ -24,6 +23,8 @@ unit DUnitX.CommandLine.Options;
 {  limitations under the License.                                           }
 {                                                                           }
 {***************************************************************************}
+
+unit VSoft.CommandLine.Options;
 
 interface
 
@@ -112,8 +113,8 @@ type
 implementation
 
 uses
-  DUnitX.CommandLine.Parser,
-  DUnitX.Commandline.OptionDef;
+  VSoft.CommandLine.Parser,
+  VSoft.Commandline.OptionDef;
 
 
 { TOptionsRegistry }

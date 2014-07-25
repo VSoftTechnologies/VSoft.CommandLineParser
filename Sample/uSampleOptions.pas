@@ -1,7 +1,7 @@
 unit uSampleOptions;
 {***************************************************************************}
 {                                                                           }
-{           DUnitX                                                          }
+{           VSoft.CommandLine                                               }
 {                                                                           }
 {           Copyright (C) 2014 Vincent Parrett                              }
 {                                                                           }

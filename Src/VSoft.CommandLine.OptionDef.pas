@@ -1,7 +1,6 @@
-unit DUnitX.CommandLine.OptionDef;
 {***************************************************************************}
 {                                                                           }
-{           DUnitX                                                          }
+{           VSoft.CommandLine                                               }
 {                                                                           }
 {           Copyright (C) 2014 Vincent Parrett                              }
 {                                                                           }
@@ -25,6 +24,8 @@ unit DUnitX.CommandLine.OptionDef;
 {                                                                           }
 {***************************************************************************}
 
+unit VSoft.CommandLine.OptionDef;
+
 interface
 
 uses
@@ -33,7 +34,7 @@ uses
   Rtti,
   TypInfo,
   Generics.Collections,
-  DUnitX.CommandLine.Options;
+  VSoft.CommandLine.Options;
 
 type
   IOptionDefInvoke = interface

@@ -29,8 +29,8 @@ interface
 
 uses
   DUnitX.TestFramework,
-  DUnitX.CommandLine.Options,
-  DUnitX.CommandLine.Parser;
+  VSoft.CommandLine.Options,
+  VSoft.CommandLine.Parser;
 
 type
   TExampleEnum = (enOne,enTwo,enThree);
@@ -98,7 +98,7 @@ implementation
 
 uses
   System.Classes,
-  DUnitX.CommandLine.OptionDef;
+  VSoft.CommandLine.OptionDef;
 
 { TCommandLineParserTests }
 
