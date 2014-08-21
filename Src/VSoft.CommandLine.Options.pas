@@ -95,6 +95,9 @@ type
       FUnnamedOptions : TList<IOptionDefintion>;
       //all registered options.
       FRegisteredOptions : TList<IOptionDefintion>;
+      //Name-Value separator
+      FNameValueSeparator: string;
+
   protected
     class constructor Create;
     class destructor Destroy;
@@ -108,6 +111,7 @@ type
     class property RegisteredOptions : TDictionary<string,IOptionDefintion> read FOptionsLookup;
     class property RegisteredUnamedOptions : TList<IOptionDefintion> read FUnnamedOptions;
     class procedure PrintUsage(const proc : TProc<string>);
+    class property NameValueSeparator: string read FNameValueSeparator write FNameValueSeparator;
   end;
 
 implementation
@@ -143,7 +147,7 @@ class function TOptionsRegistry.Parse: ICommandLineParseResult;
 var
   parser : ICommandLineParser;
 begin
-  parser := TCommandLineParser.Create;
+  parser := TCommandLineParser.Create(NameValueSeparator);
   result := parser.Parse;
 end;
 
@@ -157,7 +161,7 @@ begin
   FOptionsLookup := TDictionary<string,IOptionDefintion>.Create;
   FUnnamedOptions := TList<IOptionDefintion>.Create;
   FRegisteredOptions := TList<IOptionDefintion>.Create;
-
+  FNameValueSeparator := ':';
 end;
 
 class destructor TOptionsRegistry.Destroy;
@@ -171,7 +175,7 @@ class function TOptionsRegistry.Parse(const values: TStrings): ICommandLineParse
 var
   parser : ICommandLineParser;
 begin
-  parser := TCommandLineParser.Create;
+  parser := TCommandLineParser.Create(NameValueSeparator);
   result := parser.Parse(values);
 end;
 
