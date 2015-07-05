@@ -99,6 +99,7 @@ type
     class constructor Create;
     class destructor Destroy;
   public
+    class function RegisterOption<T>(const longName: string; const Action : TProc<T>) : IOptionDefintion;overload;
     class function RegisterOption<T>(const longName: string; const shortName : string; const Action : TProc<T>) : IOptionDefintion;overload;
     class function RegisterOption<T>(const longName: string; const shortName : string; const helpText : string; const Action : TProc<T>) : IOptionDefintion;overload;
     class function RegisterUnNamedOption<T>(const helpText : string; const Action : TProc<T>) : IOptionDefintion;overload;
@@ -204,6 +205,11 @@ class function TOptionsRegistry.RegisterOption<T>(const longName, shortName, hel
 begin
     result := RegisterOption<T>(longName,shortName,Action);
   result.HelpText := helpText;
+end;
+
+class function TOptionsRegistry.RegisterOption<T>(const longName: string; const Action: TProc<T>): IOptionDefintion;
+begin
+    result := RegisterOption<T>(longName,'',Action);
 end;
 
 class function TOptionsRegistry.RegisterUnNamedOption<T>(const helpText: string; const Action: TProc<T>): IOptionDefintion;
