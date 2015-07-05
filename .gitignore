@@ -1,6 +1,6 @@
 # Compiled source #
 ###################
-*.dcu
+**/*.dcu
 *.obj
 *.exe
 *.bpl
