@@ -92,6 +92,12 @@ type
   [Test]
   procedure Will_Generate_Error_For_Invalid_Set;
 
+  [Test]
+  procedure Can_Parse_EqualNameValueSeparator;
+
+  [Test]
+  procedure Can_Parse_ColonEqualNameValueSeparator;
+
   end;
 
 implementation
@@ -225,6 +231,55 @@ begin
   Assert.IsFalse(parseResult.HasErrors);
   Assert.AreEqual<TExampleSet>(test,[enOne,enThree]);
 end;
+
+procedure TCommandLineParserTests.Can_Parse_EqualNameValueSeparator;
+var
+  def : IOptionDefintion;
+  test : string;
+  parseResult : ICommandLineParseResult;
+  sList : TStringList;
+begin
+  def := TOptionsRegistry.RegisterOption<string>('test','t',
+                  procedure(value : string)
+                  begin
+                    test := value;
+                  end);
+
+  sList := TStringList.Create;
+  sList.Add('--test=hello');
+  try
+    TOptionsRegistry.NameValueSeparator := '=';
+    parseResult := TOptionsRegistry.Parse(sList);
+  finally
+    sList.Free;
+  end;
+  Assert.AreEqual('hello',test);
+end;
+
+procedure TCommandLineParserTests.Can_Parse_ColonEqualNameValueSeparator;
+var
+  def : IOptionDefintion;
+  test : string;
+  parseResult : ICommandLineParseResult;
+  sList : TStringList;
+begin
+  def := TOptionsRegistry.RegisterOption<string>('test','t',
+                  procedure(value : string)
+                  begin
+                    test := value;
+                  end);
+
+  sList := TStringList.Create;
+  sList.Add('--test:=hello');
+  try
+    TOptionsRegistry.NameValueSeparator := ':=';
+    parseResult := TOptionsRegistry.Parse(sList);
+  finally
+    sList.Free;
+  end;
+  Assert.AreEqual('hello',test);
+end;
+
 
 procedure TCommandLineParserTests.Can_Parse_Unnamed_Parameter;
 var

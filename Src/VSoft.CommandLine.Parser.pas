@@ -55,6 +55,7 @@ type
   TCommandLineParser = class(TInterfacedObject,ICommandLineParser)
   private
     FUnamedIndex : integer;
+    FNameValueSeparator: string;
   protected
     procedure InternalValidate(const parseErrors : IParseResultAddError);
 
@@ -64,7 +65,7 @@ type
     function Parse: ICommandLineParseResult;overload;
     function Parse(const values : TStrings) : ICommandLineParseResult;overload;
   public
-    constructor Create;
+    constructor Create(const ANameValueSeparator: string);
     destructor Destroy;override;
   end;
 
@@ -92,9 +93,11 @@ end;
 
 { TCommandLineParser }
 
-constructor TCommandLineParser.Create;
+constructor TCommandLineParser.Create(const ANameValueSeparator: string);
 begin
+  inherited Create;
   FUnamedIndex := 0;
+  FNameValueSeparator := ANameValueSeparator;
 end;
 
 destructor TCommandLineParser.Destroy;
@@ -145,12 +148,12 @@ begin
     end;
 
     if bTryValue then
-      j := Pos(':',value);
+      j := Pos(FNameValueSeparator,value);
     if j > 0 then
     begin
       //separate out into key and value
       key := Copy(value,1,j-1);
-      Delete(value,1,j);
+      Delete(value,1,j + Length(FNameValueSeparator) - 1);
       //it should already come in here without quotes when parsing paramstr(x).
       //but it might have quotes if it came in from a parameter file;
       StripQuotes(value);
