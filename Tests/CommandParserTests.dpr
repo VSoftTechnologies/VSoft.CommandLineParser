@@ -10,7 +10,8 @@ uses
   TestCommandLineParser in 'TestCommandLineParser.pas',
   VSoft.CommandLine.OptionDef in '..\Src\VSoft.CommandLine.OptionDef.pas',
   VSoft.CommandLine.Options in '..\Src\VSoft.CommandLine.Options.pas',
-  VSoft.CommandLine.Parser in '..\Src\VSoft.CommandLine.Parser.pas';
+  VSoft.CommandLine.Parser in '..\Src\VSoft.CommandLine.Parser.pas',
+  VSoft.CommandLine.CommandDef in '..\Src\VSoft.CommandLine.CommandDef.pas';
 
 var
   runner : ITestRunner;

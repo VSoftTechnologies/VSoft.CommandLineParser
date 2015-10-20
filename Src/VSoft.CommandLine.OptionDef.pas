@@ -54,7 +54,7 @@ type
     FValueRequired  : boolean;
     FIsOptionFile   : boolean;
     FAllowMultiple  : boolean;
-    FProc           : TProc<T>;
+    FProc           : TConstProc<T>;
     FWasFound       : boolean;
     FTypeInfo       : PTypeInfo;
     FDefault        : T;
@@ -85,8 +85,8 @@ type
     function GetTypeInfo : PTypeInfo;
     procedure InitDefault;
   public
-    constructor Create(const longName : string; const shortName : string; const proc : TProc<T>);overload;
-    constructor Create(const longName : string; const shortName : string; const helpText : string; const proc : TProc<T>);overload;
+    constructor Create(const longName : string; const shortName : string; const proc : TConstProc<T>);overload;
+    constructor Create(const longName : string; const shortName : string; const helpText : string; const proc : TConstProc<T>);overload;
 
   end;
 
@@ -119,7 +119,7 @@ end;
 
 
 
-constructor TOptionDefinition<T>.Create(const longName, shortName: string; const proc: TProc<T>);
+constructor TOptionDefinition<T>.Create(const longName, shortName: string; const proc: TConstProc<T>);
 begin
   FTypeInfo := TypeInfo(T);
   if not (FTypeInfo.Kind in [tkInteger,tkEnumeration,tkFloat,tkString,tkSet,tkLString,tkWString,tkInt64,tkUString]) then
@@ -132,7 +132,7 @@ begin
   InitDefault;
 end;
 
-constructor TOptionDefinition<T>.Create(const longName, shortName, helpText: string; const proc: TProc<T>);
+constructor TOptionDefinition<T>.Create(const longName, shortName, helpText: string; const proc: TConstProc<T>);
 begin
   Self.Create(longName,shortName,proc);
   FHelpText := helpText;

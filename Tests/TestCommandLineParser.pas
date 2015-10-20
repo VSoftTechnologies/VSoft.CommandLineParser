@@ -117,7 +117,7 @@ var
 
 begin
   def := TOptionsRegistry.RegisterOption<TExampleEnum>('test','t',
-                  procedure(value : TExampleEnum)
+                  procedure(const value : TExampleEnum)
                   begin
                     test := value;
                   end);
@@ -143,19 +143,19 @@ var
   test : boolean;
 begin
   def := TOptionsRegistry.RegisterUnNamedOption<string>('the file we want to process',
-                  procedure(value : string)
+                  procedure(const value : string)
                   begin
                     file1 := value;
                   end);
 
   def := TOptionsRegistry.RegisterUnNamedOption<string>('the second file we want to process',
-                  procedure(value : string)
+                  procedure(const value : string)
                   begin
                     file2 := value;
                   end);
 
   def := TOptionsRegistry.RegisterOption<boolean>('test','t',
-                  procedure(value : boolean)
+                  procedure(const value : boolean)
                   begin
                     test := value;
                   end);
@@ -184,13 +184,13 @@ var
   sList : TStringList;
 begin
   def := TOptionsRegistry.RegisterOption<string>('test','t',
-                  procedure(value : string)
+                  procedure(const value : string)
                   begin
                     test := value;
                   end);
 
   def := TOptionsRegistry.RegisterOption<string>('test2','t2',
-                  procedure(value : string)
+                  procedure(const value : string)
                   begin
                     test2 := value;
                   end);
@@ -216,7 +216,7 @@ var
 
 begin
   def := TOptionsRegistry.RegisterOption<TExampleSet>('test','t',
-                  procedure(value : TExampleSet)
+                  procedure(const value : TExampleSet)
                   begin
                     test := value;
                   end);
@@ -240,7 +240,7 @@ var
   sList : TStringList;
 begin
   def := TOptionsRegistry.RegisterOption<string>('test','t',
-                  procedure(value : string)
+                  procedure(const value : string)
                   begin
                     test := value;
                   end);
@@ -264,7 +264,7 @@ var
   sList : TStringList;
 begin
   def := TOptionsRegistry.RegisterOption<string>('test','t',
-                  procedure(value : string)
+                  procedure(const value : string)
                   begin
                     test := value;
                   end);
@@ -289,7 +289,7 @@ var
   parseResult : ICommandLineParseResult;
 begin
   def := TOptionsRegistry.RegisterUnNamedOption<string>('the file we want to process',
-                  procedure(value : string)
+                  procedure(const value : string)
                   begin
                     res := value;
                   end);
@@ -310,7 +310,7 @@ var
   def : IOptionDefintion;
 begin
   def := TOptionsRegistry.RegisterUnNamedOption<string>('the file we want to process',
-                  procedure(value : string)
+                  procedure(const value : string)
                   begin
                   end);
 
@@ -320,14 +320,12 @@ end;
 
 procedure TCommandLineParserTests.Setup;
 begin
-  TOptionsRegistry.RegisteredOptions.Clear;
-  TOptionsRegistry.RegisteredUnamedOptions.Clear;
+  TOptionsRegistry.DefaultCommand.Clear;
 end;
 
 procedure TCommandLineParserTests.TearDown;
 begin
-  TOptionsRegistry.RegisteredOptions.Clear;
-  TOptionsRegistry.RegisteredUnamedOptions.Clear;
+  TOptionsRegistry.DefaultCommand.Clear;
 end;
 
 procedure TCommandLineParserTests.Test_Single_Option;
@@ -338,7 +336,7 @@ var
   sList : TStringList;
 begin
   def := TOptionsRegistry.RegisterOption<boolean>('test','t',
-                  procedure(value : boolean)
+                  procedure(const value : boolean)
                   begin
                     result := value;
                   end);
@@ -365,13 +363,13 @@ var
   test : string;
 begin
   def := TOptionsRegistry.RegisterUnNamedOption<string>('the file we want to process',
-                  procedure(value : string)
+                  procedure(const value : string)
                   begin
                     file1 := value;
                   end);
 
   def := TOptionsRegistry.RegisterOption<string>('test','t',
-                  procedure(value : string)
+                  procedure(const value : string)
                   begin
                     test := value;
                   end);
@@ -400,7 +398,7 @@ var
   sList : TStringList;
 begin
   def := TOptionsRegistry.RegisterOption<boolean>('test','t',
-                  procedure(value : boolean)
+                  procedure(const value : boolean)
                   begin
                     result := value;
                   end);
@@ -462,12 +460,12 @@ begin
     procedure
     begin
           TOptionsRegistry.RegisterOption<boolean>('test','t',
-                        procedure(value : boolean)
+                        procedure(const value : boolean)
                         begin
                           result := value;
                         end);
           TOptionsRegistry.RegisterOption<boolean>('test','t',
-                          procedure(value : boolean)
+                          procedure(const value : boolean)
                           begin
                             result := value;
                           end);
@@ -479,12 +477,12 @@ begin
     procedure
     begin
           TOptionsRegistry.RegisterOption<boolean>('test','t',
-                        procedure(value : boolean)
+                        procedure(const value : boolean)
                         begin
                           result := value;
                         end);
           TOptionsRegistry.RegisterOption<boolean>('t','blah',
-                          procedure(value : boolean)
+                          procedure(const value : boolean)
                           begin
                             result := value;
                           end);
@@ -502,7 +500,7 @@ begin
     procedure
     begin
           TOptionsRegistry.RegisterOption<boolean>('','t',
-                        procedure(value : boolean)
+                        procedure(const value : boolean)
                         begin
                         end);
 
@@ -518,7 +516,7 @@ var
 
 begin
   def := TOptionsRegistry.RegisterOption<TExampleEnum>('test','t',
-                  procedure(value : TExampleEnum)
+                  procedure(const value : TExampleEnum)
                   begin
                     test := value;
                   end);
@@ -543,7 +541,7 @@ var
 
 begin
   def := TOptionsRegistry.RegisterOption<TExampleSet>('test','t',
-                  procedure(value : TExampleSet)
+                  procedure(const value : TExampleSet)
                   begin
                     test := value;
                   end);

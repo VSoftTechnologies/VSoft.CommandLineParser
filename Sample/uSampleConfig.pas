@@ -40,21 +40,21 @@ var
   option : IOptionDefintion;
 begin
   option := TOptionsRegistry.RegisterOption<string>('inputfile','i','The file to be processed',
-    procedure(value : string)
+    procedure(const value : string)
     begin
         TSampleOptions.InputFile := value;
     end);
   option.Required := true;
 
   option := TOptionsRegistry.RegisterOption<string>('outputfile','o','The processed output file',
-    procedure(value : string)
+    procedure(const value : string)
     begin
         TSampleOptions.OutputFile := value;
     end);
   option.Required := true;
 
   option := TOptionsRegistry.RegisterOption<boolean>('mangle','m','Mangle the file!',
-    procedure(value : boolean)
+    procedure(const value : boolean)
     begin
         TSampleOptions.MangleFile := value;
     end);

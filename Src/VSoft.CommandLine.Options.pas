@@ -36,12 +36,15 @@ uses
   Classes;
 
 type
+  TConstProc<T> = reference to procedure (const Arg1: T);
   ICommandLineParseResult = interface
     ['{1715B9FF-8A34-47C9-843E-619C5AEA3F32}']
     function GetHasErrors : boolean;
     function GetErrorText : string;
+    function GetCommandName : string;
     property HasErrors : boolean read GetHasErrors;
     property ErrorText : string read GetErrorText;
+    property Command : string read GetCommandName;
   end;
 
   ICommandLineParser = interface
@@ -86,62 +89,78 @@ type
   end;
 
 
+  ICommandDefinition = interface
+  ['{58199FE2-19DF-4F9B-894F-BD1C5B62E0CB}']
+    function GetRegisteredOptions : TList<IOptionDefintion>;
+    function GetUnNamedOptions  : TList<IOptionDefintion>;
+    function GetName : string;
+    procedure AddOption(const value : IOptionDefintion);
+    function TryGetOption(const name : string; var option : IOptionDefintion) : boolean;
+    function HasOption(const name : string) : boolean;
+    procedure Clear;
+
+    property Name : string read GetName;
+    property RegisteredOptions : TList<IOptionDefintion> read GetRegisteredOptions;
+    property RegisteredUnamedOptions : TList<IOptionDefintion> read GetUnNamedOptions;
+  end;
+
+  //Using a record here because non generic interfaces cannot have generic methods!! Still!
+  //The actual command implementation is elsewhere.
+  TCommandDefinition = record
+  private
+    FCommandDef : ICommandDefinition;
+    function GetName: string;
+  public
+    function RegisterOption<T>(const longName: string; const Action : TConstProc<T>) : IOptionDefintion;overload;
+    function RegisterOption<T>(const longName: string; const shortName : string; const Action : TConstProc<T>) : IOptionDefintion;overload;
+    function RegisterOption<T>(const longName: string; const shortName : string; const helpText : string; const Action : TConstProc<T>) : IOptionDefintion;overload;
+    function RegisterUnNamedOption<T>(const helpText : string; const Action : TConstProc<T>) : IOptionDefintion;overload;
+    function HasOption(const value : string) : boolean;
+    constructor Create(const commandDef : ICommandDefinition);
+    property Name : string read GetName;
+  end;
+
+
   TOptionsRegistry = class
   private
     class var
-      //used for fast lookup of option by name
-      FOptionsLookup : TDictionary<string,IOptionDefintion>;
-      //can't put unnamed options in dictionary, so we keep a list
-      FUnnamedOptions : TList<IOptionDefintion>;
-      //all registered options.
-      FRegisteredOptions : TList<IOptionDefintion>;
-      //Name-Value separator
       FNameValueSeparator: string;
-
+      FDefaultCommand : TCommandDefinition;
+      FCommandDefs : TDictionary<string,ICommandDefinition>;
+  protected
+    class function GetDefaultCommand: ICommandDefinition; static;
   protected
     class constructor Create;
     class destructor Destroy;
   public
-    class function RegisterOption<T>(const longName: string; const Action : TProc<T>) : IOptionDefintion;overload;
-    class function RegisterOption<T>(const longName: string; const shortName : string; const Action : TProc<T>) : IOptionDefintion;overload;
-    class function RegisterOption<T>(const longName: string; const shortName : string; const helpText : string; const Action : TProc<T>) : IOptionDefintion;overload;
-    class function RegisterUnNamedOption<T>(const helpText : string; const Action : TProc<T>) : IOptionDefintion;overload;
-    class function AllRegisteredOptions : TList<IOptionDefintion>;
+    class procedure Clear; //use for testing only;
+    class function RegisterOption<T>(const longName: string; const Action : TConstProc<T>) : IOptionDefintion;overload;
+    class function RegisterOption<T>(const longName: string; const shortName : string; const Action : TConstProc<T>) : IOptionDefintion;overload;
+    class function RegisterOption<T>(const longName: string; const shortName : string; const helpText : string; const Action : TConstProc<T>) : IOptionDefintion;overload;
+    class function RegisterUnNamedOption<T>(const helpText : string; const Action : TConstProc<T>) : IOptionDefintion;overload;
+
+    class function RegisterCommand(const value : string) : TCommandDefinition;
+
     class function Parse: ICommandLineParseResult;overload;
     class function Parse(const values : TStrings) : ICommandLineParseResult;overload;
-    class property RegisteredOptions : TDictionary<string,IOptionDefintion> read FOptionsLookup;
-    class property RegisteredUnamedOptions : TList<IOptionDefintion> read FUnnamedOptions;
+    class property RegisteredCommands : TDictionary<string,ICommandDefinition> read FCommandDefs;
     class procedure PrintUsage(const proc : TProc<string>);
     class property NameValueSeparator: string read FNameValueSeparator write FNameValueSeparator;
+    class property DefaultCommand : ICommandDefinition read GetDefaultCommand;
   end;
 
 implementation
 
 uses
   VSoft.CommandLine.Parser,
-  VSoft.Commandline.OptionDef;
-
+  VSoft.Commandline.OptionDef,
+  VSoft.CommandLine.CommandDef;
 
 { TOptionsRegistry }
 
-class function TOptionsRegistry.RegisterOption<T>(const longName, shortName: string; const Action: TProc<T>): IOptionDefintion;
+class function TOptionsRegistry.RegisterOption<T>(const longName, shortName: string; const Action: TConstProc<T>): IOptionDefintion;
 begin
-  if longName = '' then
-    raise Exception.Create('Name required - use RegisterUnamed to register unamed options');
-
-  if FOptionsLookup.ContainsKey(LowerCase(longName)) then
-    raise Exception.Create('Option : ' + longName + 'already registered');
-
-  if FOptionsLookup.ContainsKey(LowerCase(shortName)) then
-    raise Exception.Create('Option : ' + shortName + 'already registered');
-
-  result := TOptionDefinition<T>.Create(longName,shortName,Action);
-
-  FOptionsLookup.Add(LowerCase(longName),Result);
-  FRegisteredOptions.Add(Result);
-
-  if shortName <> '' then
-    FOptionsLookup.Add(LowerCase(shortName),Result);
+  result := FDefaultCommand.RegisterOption<T>(longName,shortName,Action);
 end;
 
 class function TOptionsRegistry.Parse: ICommandLineParseResult;
@@ -152,24 +171,40 @@ begin
   result := parser.Parse;
 end;
 
-class function TOptionsRegistry.AllRegisteredOptions: TList<IOptionDefintion>;
+class function TOptionsRegistry.RegisterCommand(const value: string): TCommandDefinition;
+var
+  cmdDef : ICommandDefinition;
 begin
-  result := FRegisteredOptions;
+  cmdDef := TCommandDefImpl.Create(value);
+  result := TCommandDefinition.Create(cmdDef);
+  FCommandDefs.Add(value.ToLower,cmdDef);
+end;
+
+
+class procedure TOptionsRegistry.Clear;
+begin
+  FDefaultCommand.FCommandDef.Clear;
+  FCommandDefs.Clear;
 end;
 
 class constructor TOptionsRegistry.Create;
+var
+  cmdDef : ICommandDefinition;
 begin
-  FOptionsLookup := TDictionary<string,IOptionDefintion>.Create;
-  FUnnamedOptions := TList<IOptionDefintion>.Create;
-  FRegisteredOptions := TList<IOptionDefintion>.Create;
+  cmdDef := TCommandDefImpl.Create('');
+  FDefaultCommand := TCommandDefinition.Create(cmdDef);
+  FCommandDefs := TDictionary<string,ICommandDefinition>.Create;
   FNameValueSeparator := ':';
 end;
 
 class destructor TOptionsRegistry.Destroy;
 begin
-  FOptionsLookup.Free;
-  FUnnamedOptions.Free;
-  FRegisteredOptions.Free;
+  FCommandDefs.Free;
+end;
+
+class function TOptionsRegistry.GetDefaultCommand: ICommandDefinition;
+begin
+  result := TOptionsRegistry.FDefaultCommand.FCommandDef;
 end;
 
 class function TOptionsRegistry.Parse(const values: TStrings): ICommandLineParseResult;
@@ -186,7 +221,7 @@ var
   helpString : string;
 begin
   //TODO : Improve formatting!
-  for option in AllRegisteredOptions do
+  for option in FDefaultCommand.FCommandDef.RegisteredOptions do
   begin
     if option.Hidden then
       continue;
@@ -205,23 +240,73 @@ begin
   end;  
 end;
 
-class function TOptionsRegistry.RegisterOption<T>(const longName, shortName, helpText: string; const Action: TProc<T>): IOptionDefintion;
+class function TOptionsRegistry.RegisterOption<T>(const longName, shortName, helpText: string; const Action: TConstProc<T>): IOptionDefintion;
 begin
-    result := RegisterOption<T>(longName,shortName,Action);
+  result := RegisterOption<T>(longName,shortName,Action);
   result.HelpText := helpText;
 end;
 
-class function TOptionsRegistry.RegisterOption<T>(const longName: string; const Action: TProc<T>): IOptionDefintion;
+class function TOptionsRegistry.RegisterOption<T>(const longName: string; const Action: TConstProc<T>): IOptionDefintion;
 begin
-    result := RegisterOption<T>(longName,'',Action);
+  result := RegisterOption<T>(longName,'',Action);
 end;
 
-class function TOptionsRegistry.RegisterUnNamedOption<T>(const helpText: string; const Action: TProc<T>): IOptionDefintion;
+class function TOptionsRegistry.RegisterUnNamedOption<T>(const helpText: string; const Action: TConstProc<T>): IOptionDefintion;
+begin
+  result := FDefaultCommand.RegisterUnNamedOption<T>(helpText,Action);
+end;
+
+{ TCommandDef }
+
+constructor TCommandDefinition.Create(const commandDef : ICommandDefinition);
+begin
+  FCommandDef := commandDef;
+end;
+
+
+function TCommandDefinition.RegisterOption<T>(const longName: string; const Action: TConstProc<T>): IOptionDefintion;
+begin
+  result := RegisterOption<T>(longName,'',Action);
+end;
+
+function TCommandDefinition.RegisterOption<T>(const longName, shortName: string; const Action: TConstProc<T>): IOptionDefintion;
+begin
+  if longName = '' then
+    raise Exception.Create('Name required - use RegisterUnamed to register unamed options');
+
+  if FCommandDef.HasOption(LowerCase(longName)) then
+    raise Exception.Create('Option : ' + longName + 'already registered');
+
+  if FCommandDef.HasOption(LowerCase(shortName)) then
+    raise Exception.Create('Option : ' + shortName + 'already registered');
+
+  result := TOptionDefinition<T>.Create(longName,shortName,Action);
+
+  FCommandDef.AddOption(Result);
+end;
+
+function TCommandDefinition.GetName: string;
+begin
+  result := FCommandDef.Name;
+end;
+
+function TCommandDefinition.HasOption(const value: string): boolean;
+begin
+  result := FCommandDef.HasOption(value);
+end;
+
+function TCommandDefinition.RegisterOption<T>(const longName, shortName, helpText: string; const Action: TConstProc<T>): IOptionDefintion;
+begin
+  result := RegisterOption<T>(longName,shortName,Action);
+  result.HelpText := helpText;
+end;
+
+function TCommandDefinition.RegisterUnNamedOption<T>(const helpText: string; const Action: TConstProc<T>): IOptionDefintion;
 begin
   result := TOptionDefinition<T>.Create('','',helptext,Action);
   result.HasValue := false;
-  FUnNamedOptions.Add(Result);
-  FRegisteredOptions.Add(Result);
+  FCommandDef.AddOption(result);
 end;
+
 
 end.
