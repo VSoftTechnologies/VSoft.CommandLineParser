@@ -192,12 +192,12 @@ begin
       continue;
     helpString := '--' + option.LongName;
     if option.HasValue then
-      helpString := helpString + ':value';
+      helpString := helpString + FNameValueSeparator +'value';
     if option.ShortName <> '' then
     begin
       helpString := helpString + ' or -' + option.ShortName ;
       if option.HasValue then
-        helpString := helpString + ':value';
+        helpString := helpString + FNameValueSeparator +'value';
     end;
     if option.HelpText <> '' then
       helpString := helpString + ' : ' + option.HelpText;
