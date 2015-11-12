@@ -9,22 +9,30 @@ uses
 type
   TCommandDefImpl = class(TInterfacedObject, ICommandDefinition)
   private
-    FName : string;
-    FOptionsLookup : TDictionary<string,IOptionDefintion>;
+    FName         : string;
+    FAlias        : string;
+    FDescription  : string;
+    FUsage        : string;
+    FOptionsLookup      : TDictionary<string,IOptionDefintion>;
     //can't put unnamed options in dictionary, so we keep a list
-    FUnnamedOptions : TList<IOptionDefintion>;
+    FUnnamedOptions     : TList<IOptionDefintion>;
     //all registered options.
-    FRegisteredOptions : TList<IOptionDefintion>;
+    FRegisteredOptions  : TList<IOptionDefintion>;
   protected
     procedure AddOption(const value: IOptionDefintion);
     function HasOption(const name : string) : boolean;
     function GetRegisteredOptions : TList<IOptionDefintion>;
     function GetUnNamedOptions  : TList<IOptionDefintion>;
     function GetName : string;
+    function GetAlias : string;
+    function GetDescription : string;
+    function GetUsage : string;
     function TryGetOption(const name : string; var option : IOptionDefintion) : boolean;
     procedure Clear;
+    procedure GetAllRegisteredOptions(const list : TList<IOptionDefintion>);
+
   public
-    constructor Create(const name : string);
+    constructor Create(const name : string; const alias : string; const usage : string; const description : string);
     destructor Destroy;override;
 
   end;
@@ -57,9 +65,13 @@ begin
   FUnnamedOptions.Clear;
 end;
 
-constructor TCommandDefImpl.Create(const name: string);
+constructor TCommandDefImpl.Create(const name: string; const alias : string;  const usage : string; const description : string);
 begin
-  FName := name;
+  FName               := name;
+  FUsage              := usage;
+  FDescription        := description;
+  FAlias              := alias;
+
   FOptionsLookup      := TDictionary<string,IOptionDefintion>.Create;
   FUnnamedOptions     := TList<IOptionDefintion>.Create;
   FRegisteredOptions  := TList<IOptionDefintion>.Create;
@@ -71,6 +83,22 @@ begin
   FUnnamedOptions.Free;
   FRegisteredOptions.Free;
   inherited;
+end;
+
+function TCommandDefImpl.GetAlias: string;
+begin
+  result := FAlias;
+end;
+
+procedure TCommandDefImpl.GetAllRegisteredOptions(const list: TList<IOptionDefintion>);
+begin
+  list.AddRange(FUnnamedOptions);
+  list.AddRange(FRegisteredOptions);
+end;
+
+function TCommandDefImpl.GetDescription: string;
+begin
+  result := FDescription;
 end;
 
 function TCommandDefImpl.GetName: string;
@@ -86,6 +114,11 @@ end;
 function TCommandDefImpl.GetUnNamedOptions: TList<IOptionDefintion>;
 begin
   result := FUnNamedOptions;
+end;
+
+function TCommandDefImpl.GetUsage: string;
+begin
+  result := FUsage;
 end;
 
 function TCommandDefImpl.HasOption(const name: string): boolean;

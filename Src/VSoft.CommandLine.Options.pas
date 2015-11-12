@@ -93,13 +93,20 @@ type
   ['{58199FE2-19DF-4F9B-894F-BD1C5B62E0CB}']
     function GetRegisteredOptions : TList<IOptionDefintion>;
     function GetUnNamedOptions  : TList<IOptionDefintion>;
+    procedure GetAllRegisteredOptions(const list : TList<IOptionDefintion>);
     function GetName : string;
+    function GetAlias : string;
+    function GetDescription : string;
+    function GetUsage : string;
     procedure AddOption(const value : IOptionDefintion);
     function TryGetOption(const name : string; var option : IOptionDefintion) : boolean;
     function HasOption(const name : string) : boolean;
     procedure Clear;
 
     property Name : string read GetName;
+    property Alias : string read GetAlias;
+    property Description : string read GetDescription;
+    property Usage : string read GetUsage;
     property RegisteredOptions : TList<IOptionDefintion> read GetRegisteredOptions;
     property RegisteredUnamedOptions : TList<IOptionDefintion> read GetUnNamedOptions;
   end;
@@ -110,6 +117,9 @@ type
   private
     FCommandDef : ICommandDefinition;
     function GetName: string;
+    function GetDescription : string;
+    function GetUsage : string;
+    function GetAlias : string;
   public
     function RegisterOption<T>(const longName: string; const Action : TConstProc<T>) : IOptionDefintion;overload;
     function RegisterOption<T>(const longName: string; const shortName : string; const Action : TConstProc<T>) : IOptionDefintion;overload;
@@ -118,6 +128,9 @@ type
     function HasOption(const value : string) : boolean;
     constructor Create(const commandDef : ICommandDefinition);
     property Name : string read GetName;
+    property Alias : string read GetAlias;
+    property Description : string read GetDescription;
+    property Usage : string read GetUsage;
   end;
 
 
@@ -139,12 +152,15 @@ type
     class function RegisterOption<T>(const longName: string; const shortName : string; const helpText : string; const Action : TConstProc<T>) : IOptionDefintion;overload;
     class function RegisterUnNamedOption<T>(const helpText : string; const Action : TConstProc<T>) : IOptionDefintion;overload;
 
-    class function RegisterCommand(const value : string) : TCommandDefinition;
+    class function RegisterCommand(const name : string; const alias : string; const helpString : string; const usage : string) : TCommandDefinition;
 
     class function Parse: ICommandLineParseResult;overload;
     class function Parse(const values : TStrings) : ICommandLineParseResult;overload;
     class property RegisteredCommands : TDictionary<string,ICommandDefinition> read FCommandDefs;
-    class procedure PrintUsage(const proc : TProc<string>);
+    class procedure PrintUsage(const proc : TProc<string>);overload;
+    class procedure PrintUsage(const commandName : string; const proc : TProc<string>);overload;
+    class procedure PrintUsage(const command : ICommandDefinition; const proc : TProc<string>);overload;
+
     class property NameValueSeparator: string read FNameValueSeparator write FNameValueSeparator;
     class property DefaultCommand : ICommandDefinition read GetDefaultCommand;
   end;
@@ -171,13 +187,13 @@ begin
   result := parser.Parse;
 end;
 
-class function TOptionsRegistry.RegisterCommand(const value: string): TCommandDefinition;
+class function TOptionsRegistry.RegisterCommand(const name: string; const alias : string; const helpString : string; const usage : string): TCommandDefinition;
 var
   cmdDef : ICommandDefinition;
 begin
-  cmdDef := TCommandDefImpl.Create(value);
+  cmdDef := TCommandDefImpl.Create(name,alias, usage,helpString);
   result := TCommandDefinition.Create(cmdDef);
-  FCommandDefs.Add(value.ToLower,cmdDef);
+  FCommandDefs.Add(name.ToLower,cmdDef);
 end;
 
 
@@ -191,7 +207,7 @@ class constructor TOptionsRegistry.Create;
 var
   cmdDef : ICommandDefinition;
 begin
-  cmdDef := TCommandDefImpl.Create('');
+  cmdDef := TCommandDefImpl.Create('','','','');
   FDefaultCommand := TCommandDefinition.Create(cmdDef);
   FCommandDefs := TDictionary<string,ICommandDefinition>.Create;
   FNameValueSeparator := ':';
@@ -215,29 +231,70 @@ begin
   result := parser.Parse(values);
 end;
 
-class procedure TOptionsRegistry.PrintUsage(const proc: TProc<string>);
+class procedure TOptionsRegistry.PrintUsage(const command: ICommandDefinition; const proc: TProc<string>);
 var
   option : IOptionDefintion;
   helpString : string;
+  list : TList<IOptionDefintion>;
 begin
-  //TODO : Improve formatting!
-  for option in FDefaultCommand.FCommandDef.RegisteredOptions do
-  begin
-    if option.Hidden then
-      continue;
-    helpString := '--' + option.LongName;
-    if option.HasValue then
-      helpString := helpString + ':value';
-    if option.ShortName <> '' then
+  list := TList<IOptionDefintion>.Create;
+  try
+    command.GetAllRegisteredOptions(list);
+    for option in list do
     begin
-      helpString := helpString + ' or -' + option.ShortName ;
+      if option.Hidden then
+        continue;
+      helpString := '--' + option.LongName;
       if option.HasValue then
         helpString := helpString + ':value';
+      if option.ShortName <> '' then
+      begin
+        helpString := helpString + ' or -' + option.ShortName ;
+        if option.HasValue then
+          helpString := helpString + ':value';
+      end;
+      if option.HelpText <> '' then
+        helpString := helpString + ' : ' + option.HelpText;
+      proc(helpString)
     end;
-    if option.HelpText <> '' then
-      helpString := helpString + ' : ' + option.HelpText;
-    proc(helpString)
-  end;  
+  finally
+    list.Free;
+  end;
+
+end;
+
+class procedure TOptionsRegistry.PrintUsage(const commandName: string; const proc: TProc<string>);
+var
+  cmd : ICommandDefinition;
+begin
+  if commandName = '' then
+  begin
+    PrintUsage(proc);
+    exit;
+  end;
+
+  if not FCommandDefs.TryGetValue(LowerCase(commandName),cmd) then
+  begin
+    proc('Unknown command : ' + commandName);
+    exit;
+  end;
+  proc('Command options:');
+  PrintUsage(cmd,proc);
+  proc('Global options:');
+  PrintUsage(FDefaultCommand.FCommandDef,proc);
+end;
+
+class procedure TOptionsRegistry.PrintUsage(const proc: TProc<string>);
+var
+  cmd : ICommandDefinition;
+begin
+  for cmd in FCommandDefs.Values do
+  begin
+    proc('Command options:');
+    PrintUsage(cmd,proc);
+  end;
+  proc('Global options:');
+  PrintUsage(FDefaultCommand.FCommandDef,proc);
 end;
 
 class function TOptionsRegistry.RegisterOption<T>(const longName, shortName, helpText: string; const Action: TConstProc<T>): IOptionDefintion;
@@ -285,9 +342,24 @@ begin
   FCommandDef.AddOption(Result);
 end;
 
+function TCommandDefinition.GetAlias: string;
+begin
+  result := FCommandDef.Alias;
+end;
+
+function TCommandDefinition.GetDescription: string;
+begin
+  result := FCommandDef.Description;
+end;
+
 function TCommandDefinition.GetName: string;
 begin
   result := FCommandDef.Name;
+end;
+
+function TCommandDefinition.GetUsage: string;
+begin
+  result := FCommandDef.Usage;
 end;
 
 function TCommandDefinition.HasOption(const value: string): boolean;
