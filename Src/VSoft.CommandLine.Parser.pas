@@ -34,18 +34,25 @@ uses
   VSoft.CommandLine.OptionDef;
 
 type
-  IParseResultAddError = interface
+  IInternalParseResult = interface
     ['{9EADABED-511B-4095-9ACA-A5E431AB653D}']
     procedure AddError(const value : string);
+    procedure SetCommand(const command : ICommandDefinition);
+    function GetCommand : ICommandDefinition;
+    property Command : ICommandDefinition read GetCommand;
   end;
 
-  TCommandLineParseResult = class(TInterfacedObject,ICommandLineParseResult,IParseResultAddError)
+  TCommandLineParseResult = class(TInterfacedObject,ICommandLineParseResult,IInternalParseResult)
   private
     FErrors : TStringList;
+    FCommand : ICommandDefinition;
   protected
     function GetErrorText: string;
     function GetHasErrors: Boolean;
     procedure AddError(const value: string);
+    function GetCommandName : string;
+    procedure SetCommand(const command : ICommandDefinition);
+    function GetCommand : ICommandDefinition;
   public
     constructor Create;
     destructor Destroy;override;
@@ -57,10 +64,10 @@ type
     FUnamedIndex : integer;
     FNameValueSeparator: string;
   protected
-    procedure InternalValidate(const parseErrors : IParseResultAddError);
+    procedure InternalValidate(const parseResult: IInternalParseResult);
 
-    procedure InternalParseFile(const fileName : string; const parseErrors : IParseResultAddError);
-    procedure InternalParse(const values : TStrings; const parseErrors : IParseResultAddError);
+    procedure InternalParseFile(const fileName : string; const parseResult : IInternalParseResult);
+    procedure InternalParse(const values : TStrings; const parseResult : IInternalParseResult);
 
     function Parse: ICommandLineParseResult;overload;
     function Parse(const values : TStrings) : ICommandLineParseResult;overload;
@@ -106,16 +113,23 @@ begin
   inherited;
 end;
 
-procedure TCommandLineParser.InternalParse(const values: TStrings; const parseErrors: IParseResultAddError);
+procedure TCommandLineParser.InternalParse(const values: TStrings; const parseResult: IInternalParseResult);
 var
   i : integer;
   j : integer;
   value : string;
   key : string;
   option : IOptionDefintion;
+  currentCommand : ICommandDefinition;
+  newCommand     : ICommandDefinition;
+  defaultCommand : ICommandDefinition;
   bTryValue : boolean;
   bUseKey : boolean;
+
 begin
+  defaultCommand := TOptionsRegistry.DefaultCommand;
+  currentCommand := defaultCommand;
+
   for i := 0 to values.Count -1 do
   begin
     j := 0;
@@ -133,9 +147,19 @@ begin
       Delete(value,1,1)
     else if StartsStr('@',value)  then
       Delete(value,1,1)
-    else if FUnamedIndex < TOptionsRegistry.RegisteredUnamedOptions.Count  then
+    //if command name = '' then it's the default;
+    else if (currentCommand.Name = '') and TOptionsRegistry.RegisteredCommands.TryGetValue(LowerCase(value),newCommand) then
     begin
-      option := TOptionsRegistry.RegisteredUnamedOptions.Items[FUnamedIndex];
+      currentCommand := newCommand;
+      newCommand := nil;
+      //switching commands
+      parseResult.SetCommand(currentCommand);
+      FUnamedIndex := 0;
+      continue;
+    end
+    else if FUnamedIndex < currentCommand.RegisteredUnamedOptions.Count  then
+    begin
+      option := currentCommand.RegisteredUnamedOptions.Items[FUnamedIndex];
       Inc(FUnamedIndex);
       bTryValue := false;
       bUseKey := True;
@@ -143,7 +167,7 @@ begin
     else
     begin
       //don't recognise the start so report it and continue.
-      parseErrors.AddError('Unknown option start : ' + values.Strings[i]);
+      parseResult.AddError('Unknown option start : ' + values.Strings[i]);
       continue;
     end;
 
@@ -166,13 +190,23 @@ begin
     end;
 
     if option = nil then
-      TOptionsRegistry.RegisteredOptions.TryGetValue(LowerCase(key), option);
+    begin
+
+      if not currentCommand.TryGetOption(LowerCase(key), option) then
+      begin
+        if currentCommand <> defaultCommand then
+        begin
+          //last resort to find an option.
+          defaultCommand.TryGetOption(LowerCase(key), option)
+        end;
+      end;
+    end;
 
     if option <> nil then
     begin
       if option.HasValue and (value = '') then
       begin
-        parseErrors.AddError('Option [' + key +'] expected a following :value but none was found');
+        parseResult.AddError('Option [' + key +'] expected a following :value but none was found');
         continue;
       end;
       if option.IsOptionFile then
@@ -183,15 +217,15 @@ begin
         //TODO : should options file override other options or vica versa?
         if not FileExists(value) then
         begin
-          parseErrors.AddError('Parameter File [' + value +'] does not exist');
+          parseResult.AddError('Parameter File [' + value +'] does not exist');
           continue;
         end;
         try
-          InternalParseFile(value,parseErrors);
+          InternalParseFile(value,parseResult);
         except
           on e : Exception do
           begin
-            parseErrors.AddError('Error parsing Parameter File [' + value +'] : ' + e.Message);
+            parseResult.AddError('Error parsing Parameter File [' + value +'] : ' + e.Message);
           end;
         end;
       end
@@ -205,53 +239,67 @@ begin
         except
           on e : Exception do
           begin
-            parseErrors.AddError('Error setting option : ' + key + ' to ' + value + ' : ' + e.Message );
+            parseResult.AddError('Error setting option : ' + key + ' to ' + value + ' : ' + e.Message );
           end;
         end;
       end;
     end
     else
     begin
-      parseErrors.AddError('Unknown command line option : ' + values.Strings[i]);
+      parseResult.AddError('Unknown command line option : ' + values.Strings[i]);
       continue;
     end;
   end;
 end;
 
-procedure TCommandLineParser.InternalParseFile(const fileName: string; const parseErrors: IParseResultAddError);
+procedure TCommandLineParser.InternalParseFile(const fileName: string; const parseResult: IInternalParseResult);
 var
   sList : TStringList;
 begin
   sList := TStringList.Create;
   try
-    sList.LoadFromFile(fileName);
-    InternalParse(sList,parseErrors);
+    InternalParse(sList,parseResult);
   finally
     sList.Free;
   end;
 end;
 
-procedure TCommandLineParser.InternalValidate(const parseErrors: IParseResultAddError);
+procedure TCommandLineParser.InternalValidate(const parseResult: IInternalParseResult);
 var
   option : IOptionDefintion;
 begin
-  for option in TOptionsRegistry.AllRegisteredOptions do
+  for option in TOptionsRegistry.DefaultCommand.RegisteredOptions do
   begin
     if option.Required then
     begin
       if not (option as IOptionDefInvoke).WasFound then
       begin
-        parseErrors.AddError('Required Option [' + option.LongName + '] was not specified');
+        parseResult.AddError('Required Option [' + option.LongName + '] was not specified');
       end;
     end;
   end;
+
+  if parseResult.command <> nil then
+  begin
+    for option in parseResult.command.RegisteredOptions do
+    begin
+      if option.Required then
+      begin
+        if not (option as IOptionDefInvoke).WasFound then
+        begin
+          parseResult.AddError('Required Option [' + option.LongName + '] was not specified');
+        end;
+      end;
+    end;
+  end;
+
 end;
 
 function TCommandLineParser.Parse(const values: TStrings): ICommandLineParseResult;
 begin
   result := TCommandLineParseResult.Create;
-  InternalParse(values,result as IParseResultAddError);
-  InternalValidate(result as IParseResultAddError);
+  InternalParse(values,result as IInternalParseResult);
+  InternalValidate(result as IInternalParseResult);
 end;
 
 function TCommandLineParser.Parse: ICommandLineParseResult;
@@ -283,12 +331,26 @@ end;
 constructor TCommandLineParseResult.Create;
 begin
   FErrors := TStringList.Create;
+  FCommand := nil;
 end;
 
 destructor TCommandLineParseResult.Destroy;
 begin
   FErrors.Free;
   inherited;
+end;
+
+function TCommandLineParseResult.GetCommand: ICommandDefinition;
+begin
+  result := FCommand;
+end;
+
+function TCommandLineParseResult.GetCommandName: string;
+begin
+  if FCommand <> nil then
+    result := FCommand.Name
+  else
+    result := '';
 end;
 
 function TCommandLineParseResult.GetErrorText: string;
@@ -300,5 +362,11 @@ function TCommandLineParseResult.GetHasErrors: Boolean;
 begin
   result := FErrors.Count > 0;
 end;
+
+procedure TCommandLineParseResult.SetCommand(const command: ICommandDefinition);
+begin
+  FCommand := command;
+end;
+
 
 end.
