@@ -13,6 +13,7 @@ type
     FAlias        : string;
     FDescription  : string;
     FUsage        : string;
+    FVisible      : boolean;
     FOptionsLookup      : TDictionary<string,IOptionDefintion>;
     //can't put unnamed options in dictionary, so we keep a list
     FUnnamedOptions     : TList<IOptionDefintion>;
@@ -27,12 +28,13 @@ type
     function GetAlias : string;
     function GetDescription : string;
     function GetUsage : string;
+    function GetVisible : boolean;
     function TryGetOption(const name : string; var option : IOptionDefintion) : boolean;
     procedure Clear;
     procedure GetAllRegisteredOptions(const list : TList<IOptionDefintion>);
 
   public
-    constructor Create(const name : string; const alias : string; const usage : string; const description : string);
+    constructor Create(const name : string; const alias : string; const usage : string; const description : string; const visible : boolean);
     destructor Destroy;override;
 
   end;
@@ -65,12 +67,13 @@ begin
   FUnnamedOptions.Clear;
 end;
 
-constructor TCommandDefImpl.Create(const name: string; const alias : string;  const usage : string; const description : string);
+constructor TCommandDefImpl.Create(const name: string; const alias : string;  const usage : string; const description : string; const visible : boolean);
 begin
   FName               := name;
   FUsage              := usage;
   FDescription        := description;
   FAlias              := alias;
+  FVisible            := visible;
 
   FOptionsLookup      := TDictionary<string,IOptionDefintion>.Create;
   FUnnamedOptions     := TList<IOptionDefintion>.Create;
@@ -119,6 +122,11 @@ end;
 function TCommandDefImpl.GetUsage: string;
 begin
   result := FUsage;
+end;
+
+function TCommandDefImpl.GetVisible: boolean;
+begin
+  result := FVisible;
 end;
 
 function TCommandDefImpl.HasOption(const name: string): boolean;

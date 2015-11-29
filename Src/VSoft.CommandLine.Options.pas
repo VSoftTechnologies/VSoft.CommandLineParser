@@ -98,6 +98,7 @@ type
     function GetAlias : string;
     function GetDescription : string;
     function GetUsage : string;
+    function GetVisible : boolean;
     procedure AddOption(const value : IOptionDefintion);
     function TryGetOption(const name : string; var option : IOptionDefintion) : boolean;
     function HasOption(const name : string) : boolean;
@@ -109,6 +110,7 @@ type
     property Usage : string read GetUsage;
     property RegisteredOptions : TList<IOptionDefintion> read GetRegisteredOptions;
     property RegisteredUnamedOptions : TList<IOptionDefintion> read GetUnNamedOptions;
+    property Visible : boolean read GetVisible;
   end;
 
   //Using a record here because non generic interfaces cannot have generic methods!! Still!
@@ -131,6 +133,7 @@ type
     property Alias : string read GetAlias;
     property Description : string read GetDescription;
     property Usage : string read GetUsage;
+
   end;
 
 
@@ -152,7 +155,7 @@ type
     class function RegisterOption<T>(const longName: string; const shortName : string; const helpText : string; const Action : TConstProc<T>) : IOptionDefintion;overload;
     class function RegisterUnNamedOption<T>(const helpText : string; const Action : TConstProc<T>) : IOptionDefintion;overload;
 
-    class function RegisterCommand(const name : string; const alias : string; const helpString : string; const usage : string) : TCommandDefinition;
+    class function RegisterCommand(const name : string; const alias : string; const helpString : string; const usage : string; const visible : boolean = true) : TCommandDefinition;
 
     class function Parse: ICommandLineParseResult;overload;
     class function Parse(const values : TStrings) : ICommandLineParseResult;overload;
@@ -161,6 +164,8 @@ type
     class procedure PrintUsage(const commandName : string; const proc : TProc<string>);overload;
     class procedure PrintUsage(const command : ICommandDefinition; const proc : TProc<string>);overload;
 
+    class procedure EnumerateCommands(const proc : TProc<string,string>);
+    class function GetCommandByName(const name : string) : ICommandDefinition;
     class property NameValueSeparator: string read FNameValueSeparator write FNameValueSeparator;
     class property DefaultCommand : ICommandDefinition read GetDefaultCommand;
   end;
@@ -168,6 +173,7 @@ type
 implementation
 
 uses
+  Generics.Defaults,
   VSoft.CommandLine.Parser,
   VSoft.Commandline.OptionDef,
   VSoft.CommandLine.CommandDef;
@@ -187,11 +193,11 @@ begin
   result := parser.Parse;
 end;
 
-class function TOptionsRegistry.RegisterCommand(const name: string; const alias : string; const helpString : string; const usage : string): TCommandDefinition;
+class function TOptionsRegistry.RegisterCommand(const name: string; const alias : string; const helpString : string; const usage : string; const visible : boolean): TCommandDefinition;
 var
   cmdDef : ICommandDefinition;
 begin
-  cmdDef := TCommandDefImpl.Create(name,alias, usage,helpString);
+  cmdDef := TCommandDefImpl.Create(name,alias, usage,helpString,visible);
   result := TCommandDefinition.Create(cmdDef);
   FCommandDefs.Add(name.ToLower,cmdDef);
 end;
@@ -207,7 +213,7 @@ class constructor TOptionsRegistry.Create;
 var
   cmdDef : ICommandDefinition;
 begin
-  cmdDef := TCommandDefImpl.Create('','','','');
+  cmdDef := TCommandDefImpl.Create('','','','',true);
   FDefaultCommand := TCommandDefinition.Create(cmdDef);
   FCommandDefs := TDictionary<string,ICommandDefinition>.Create;
   FNameValueSeparator := ':';
@@ -216,6 +222,12 @@ end;
 class destructor TOptionsRegistry.Destroy;
 begin
   FCommandDefs.Free;
+end;
+
+class function TOptionsRegistry.GetCommandByName(const name: string): ICommandDefinition;
+begin
+  result := nil;
+  FCommandDefs.TryGetValue(name.ToLower,Result);
 end;
 
 class function TOptionsRegistry.GetDefaultCommand: ICommandDefinition;
@@ -231,28 +243,63 @@ begin
   result := parser.Parse(values);
 end;
 
+class procedure TOptionsRegistry.EnumerateCommands(const proc: TProc<string,string>);
+var
+  cmd : ICommandDefinition;
+  cmdList : TList<ICommandDefinition>;
+begin
+  //The commandDefs are stored in a dictionary, so we need to sort them ourselves.
+  cmdList := TList<ICommandDefinition>.Create;
+  try
+    for cmd in FCommandDefs.Values do
+    begin
+      if cmd.Visible then
+        cmdList.Add(cmd);
+    end;
+    
+    cmdList.Sort(TComparer<ICommandDefinition>.Construct(
+    function (const L, R: ICommandDefinition): integer
+    begin
+      Result := CompareText(L.Name,R.Name);
+    end));
+
+    for cmd in cmdList do
+      proc(cmd.Name,cmd.Description);
+
+  finally
+    cmdList.Free;
+  end;
+end;
+
 class procedure TOptionsRegistry.PrintUsage(const command: ICommandDefinition; const proc: TProc<string>);
 var
   option : IOptionDefintion;
   helpString : string;
   list : TList<IOptionDefintion>;
 begin
+  proc('usage: ' + command.Usage);
+  proc('');
+  proc(command.Description);
+  proc('');
+
+
   list := TList<IOptionDefintion>.Create;
   try
     command.GetAllRegisteredOptions(list);
     for option in list do
     begin
-      if option.Hidden then
+      if option.Hidden or option.IsUnnamed then
         continue;
-      helpString := '--' + option.LongName;
+      helpString := ' --' + option.LongName;
       if option.HasValue then
-      helpString := helpString + FNameValueSeparator +'value';
+        helpString := helpString + FNameValueSeparator +'value';
       if option.ShortName <> '' then
       begin
         helpString := helpString + ' or -' + option.ShortName ;
         if option.HasValue then
         helpString := helpString + FNameValueSeparator +'value';
       end;
+      helpstring := helpstring.PadRight(30);
       if option.HelpText <> '' then
         helpString := helpString + ' : ' + option.HelpText;
       proc(helpString)
@@ -278,10 +325,7 @@ begin
     proc('Unknown command : ' + commandName);
     exit;
   end;
-  proc('Command options:');
   PrintUsage(cmd,proc);
-  proc('Global options:');
-  PrintUsage(FDefaultCommand.FCommandDef,proc);
 end;
 
 class procedure TOptionsRegistry.PrintUsage(const proc: TProc<string>);
