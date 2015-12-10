@@ -70,7 +70,7 @@
         <Manifest_File>None</Manifest_File>
         <VerInfo_Locale>1033</VerInfo_Locale>
         <DCC_MapFile>3</DCC_MapFile>
-        <Debugger_RunParams>--inputfile:&quot;c:\test folder\testfile.txt&quot;</Debugger_RunParams>
+        <Debugger_RunParams>--inputfile:&quot;c:\test folder\testfile.txt&quot; --outputfile:&quot;c:\test folder\testfile2.txt&quot;</Debugger_RunParams>
         <DCC_RemoteDebug>false</DCC_RemoteDebug>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Cfg_2)'!=''">

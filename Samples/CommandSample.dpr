@@ -28,7 +28,7 @@ begin
       Writeln(parseresult.ErrorText);
       Writeln('Usage :');
       TOptionsRegistry.PrintUsage(
-        procedure(value : string)
+        procedure(const value : string)
         begin
           Writeln(value);
         end);
