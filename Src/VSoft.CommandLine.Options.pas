@@ -107,7 +107,8 @@ type
     function TryGetOption(const name : string; var option : IOptionDefintion) : boolean;
     function HasOption(const name : string) : boolean;
     procedure Clear;
-    procedure EmumerateCommandOptions(const proc : TConstProc<string,string, string>);
+    procedure EmumerateCommandOptions(const proc : TConstProc<string,string, string>);overload;
+    procedure EmumerateCommandOptions(const proc : TConstProc<IOptionDefintion>);overload;
 
     property Name : string read GetName;
     property Alias : string read GetAlias;
@@ -170,8 +171,11 @@ type
     class procedure PrintUsage(const commandName : string; const proc : TConstProc<string>);overload;
     class procedure PrintUsage(const command : ICommandDefinition; const proc : TConstProc<string>);overload;
 
-    class procedure EnumerateCommands(const proc : TConstProc<string,string>);
-    class procedure EmumerateCommandOptions(const commandName : string; const proc : TConstProc<string,string, string>);
+    class procedure EnumerateCommands(const proc : TConstProc<string,string>);overload;
+    class procedure EnumerateCommands(const proc : TConstProc<ICommandDefinition>);overload;
+
+    class procedure EmumerateCommandOptions(const commandName : string; const proc : TConstProc<string,string, string>);overload;
+    class procedure EmumerateCommandOptions(const commandName : string; const proc : TConstProc<IOptionDefintion>);overload;
 
     class function GetCommandByName(const name : string) : ICommandDefinition;
 
@@ -482,5 +486,42 @@ begin
   FCommandDef.AddOption(result);
 end;
 
+
+class procedure TOptionsRegistry.EmumerateCommandOptions(const commandName: string; const proc: TConstProc<IOptionDefintion>);
+var
+  cmd : ICommandDefinition;
+begin
+  if not FCommandDefs.TryGetValue(commandName,cmd) then
+    raise Exception.Create('Unknown command : ' + commandName);
+  cmd.EmumerateCommandOptions(proc);
+end;
+
+class procedure TOptionsRegistry.EnumerateCommands(const proc: TConstProc<ICommandDefinition>);
+var
+  cmd : ICommandDefinition;
+  cmdList : TList<ICommandDefinition>;
+begin
+  //The commandDefs are stored in a dictionary, so we need to sort them ourselves.
+  cmdList := TList<ICommandDefinition>.Create;
+  try
+    for cmd in FCommandDefs.Values do
+    begin
+      if cmd.Visible then
+        cmdList.Add(cmd);
+    end;
+
+    cmdList.Sort(TComparer<ICommandDefinition>.Construct(
+    function (const L, R: ICommandDefinition): integer
+    begin
+      Result := CompareText(L.Name,R.Name);
+    end));
+
+    for cmd in cmdList do
+      proc(cmd);
+
+  finally
+    cmdList.Free;
+  end;
+end;
 
 end.

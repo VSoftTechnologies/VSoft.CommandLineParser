@@ -34,7 +34,8 @@ type
     function TryGetOption(const name : string; var option : IOptionDefintion) : boolean;
     procedure Clear;
     procedure GetAllRegisteredOptions(const list : TList<IOptionDefintion>);
-    procedure EmumerateCommandOptions(const proc : TConstProc<string,string, string>);
+    procedure EmumerateCommandOptions(const proc : TConstProc<string,string, string>);overload;
+    procedure EmumerateCommandOptions(const proc : TConstProc<IOptionDefintion>);overload;
 
   public
     constructor Create(const name : string; const alias : string; const usage : string; const description : string; const helpText : string; const visible : boolean);
@@ -91,6 +92,28 @@ begin
   FUnnamedOptions.Free;
   FRegisteredOptions.Free;
   inherited;
+end;
+
+procedure TCommandDefImpl.EmumerateCommandOptions(const proc: TConstProc<IOptionDefintion>);
+var
+  optionList : TList<IOptionDefintion>;
+  opt : IOptionDefintion;
+begin
+  optionList := TList<IOptionDefintion>.Create;
+  try
+    optionList.AddRange(FRegisteredOptions);
+
+    optionList.Sort(TComparer<IOptionDefintion>.Construct(
+      function (const L, R: IOptionDefintion): integer
+      begin
+        Result := CompareText(L.LongName,R.LongName);
+      end));
+
+    for opt in optionList do
+      proc(opt);
+  finally
+    optionList.Free;
+  end;
 end;
 
 procedure TCommandDefImpl.EmumerateCommandOptions(const proc: TConstProc<string, string, string>);
