@@ -6,10 +6,10 @@
         <Projects Include="Tests\CommandParserTests_XE2.dproj">
             <Dependencies/>
         </Projects>
-        <Projects Include="Sample\Sample.dproj">
+        <Projects Include="Samples\Simple\Sample.dproj">
             <Dependencies/>
         </Projects>
-        <Projects Include="Samples\CommandSample.dproj">
+        <Projects Include="Samples\Command\CommandSample.dproj">
             <Dependencies/>
         </Projects>
     </ItemGroup>
@@ -30,22 +30,22 @@
         <MSBuild Projects="Tests\CommandParserTests_XE2.dproj" Targets="Make"/>
     </Target>
     <Target Name="Sample">
-        <MSBuild Projects="Sample\Sample.dproj"/>
+        <MSBuild Projects="Samples\Simple\Sample.dproj"/>
     </Target>
     <Target Name="Sample:Clean">
-        <MSBuild Projects="Sample\Sample.dproj" Targets="Clean"/>
+        <MSBuild Projects="Samples\Simple\Sample.dproj" Targets="Clean"/>
     </Target>
     <Target Name="Sample:Make">
-        <MSBuild Projects="Sample\Sample.dproj" Targets="Make"/>
+        <MSBuild Projects="Samples\Simple\Sample.dproj" Targets="Make"/>
     </Target>
     <Target Name="CommandSample">
-        <MSBuild Projects="Samples\CommandSample.dproj"/>
+        <MSBuild Projects="Samples\Command\CommandSample.dproj"/>
     </Target>
     <Target Name="CommandSample:Clean">
-        <MSBuild Projects="Samples\CommandSample.dproj" Targets="Clean"/>
+        <MSBuild Projects="Samples\Command\CommandSample.dproj" Targets="Clean"/>
     </Target>
     <Target Name="CommandSample:Make">
-        <MSBuild Projects="Samples\CommandSample.dproj" Targets="Make"/>
+        <MSBuild Projects="Samples\Command\CommandSample.dproj" Targets="Make"/>
     </Target>
     <Target Name="Build">
         <CallTarget Targets="CommandParserTests_XE2;Sample;CommandSample"/>

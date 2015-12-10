@@ -40,7 +40,7 @@
         <Base>true</Base>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Base)'!=''">
-        <DCC_UnitSearchPath>..\Src;$(DCC_UnitSearchPath)</DCC_UnitSearchPath>
+        <DCC_UnitSearchPath>..\..\Src;$(DCC_UnitSearchPath)</DCC_UnitSearchPath>
         <VerInfo_Keys>CompanyName=;FileDescription=;FileVersion=1.0.0.0;InternalName=;LegalCopyright=;LegalTrademarks=;OriginalFilename=;ProductName=;ProductVersion=1.0.0.0;Comments=</VerInfo_Keys>
         <VerInfo_Locale>3081</VerInfo_Locale>
         <Manifest_File>None</Manifest_File>
@@ -83,9 +83,9 @@
         <DelphiCompile Include="$(MainSource)">
             <MainSource>MainSource</MainSource>
         </DelphiCompile>
-        <DCCReference Include="..\Src\VSoft.CommandLine.OptionDef.pas"/>
-        <DCCReference Include="..\Src\VSoft.CommandLine.Options.pas"/>
-        <DCCReference Include="..\Src\VSoft.CommandLine.Parser.pas"/>
+        <DCCReference Include="..\..\Src\VSoft.CommandLine.OptionDef.pas"/>
+        <DCCReference Include="..\..\Src\VSoft.CommandLine.Options.pas"/>
+        <DCCReference Include="..\..\Src\VSoft.CommandLine.Parser.pas"/>
         <DCCReference Include="uSampleConfig.pas"/>
         <DCCReference Include="uSampleOptions.pas"/>
         <BuildConfiguration Include="Release">

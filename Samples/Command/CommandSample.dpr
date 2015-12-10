@@ -6,12 +6,12 @@ program CommandSample;
 
 uses
   System.SysUtils,
-  VSoft.CommandLine.OptionDef in '..\Src\VSoft.CommandLine.OptionDef.pas',
-  VSoft.CommandLine.Options in '..\Src\VSoft.CommandLine.Options.pas',
-  VSoft.CommandLine.Parser in '..\Src\VSoft.CommandLine.Parser.pas',
+  VSoft.CommandLine.OptionDef in '..\..\Src\VSoft.CommandLine.OptionDef.pas',
+  VSoft.CommandLine.Options in '..\..\Src\VSoft.CommandLine.Options.pas',
+  VSoft.CommandLine.Parser in '..\..\Src\VSoft.CommandLine.Parser.pas',
+  VSoft.CommandLine.CommandDef in '..\..\Src\VSoft.CommandLine.CommandDef.pas',
   uCommandSampleConfig in 'uCommandSampleConfig.pas',
-  uCommandSampleOptions in 'uCommandSampleOptions.pas',
-  VSoft.CommandLine.CommandDef in '..\Src\VSoft.CommandLine.CommandDef.pas';
+  uCommandSampleOptions in 'uCommandSampleOptions.pas';
 
 {
 Note : The Options are registered in uSampleOptions
