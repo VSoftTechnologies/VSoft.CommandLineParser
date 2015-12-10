@@ -14,6 +14,13 @@ var
   cmd    : TCommandDefinition;
   option : IOptionDefintion;
 begin
+  option := TOptionsRegistry.RegisterOption<boolean>('verbose','v','verbose output',
+    procedure(const value : boolean)
+    begin
+        TGlobalOptions.Verbose := value;
+    end);
+  option.HasValue := false;
+
 
   cmd := TOptionsRegistry.RegisterCommand('help','h','get some help','','commandsample help [command]');
   option := cmd.RegisterUnNamedOption<string>('The command you need help for',
