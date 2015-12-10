@@ -85,7 +85,6 @@
     <PropertyGroup Condition="'$(Cfg_1_Win32)'!=''">
         <VerInfo_Locale>1033</VerInfo_Locale>
         <Manifest_File>None</Manifest_File>
-        <Debugger_RunParams>help install</Debugger_RunParams>
         <DCC_RemoteDebug>false</DCC_RemoteDebug>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Cfg_2)'!=''">
@@ -104,6 +103,7 @@
         <DCCReference Include="..\..\Src\VSoft.CommandLine.CommandDef.pas"/>
         <DCCReference Include="uCommandSampleConfig.pas"/>
         <DCCReference Include="uCommandSampleOptions.pas"/>
+        <DCCReference Include="..\..\Src\VSoft.CommandLine.Utils.pas"/>
         <BuildConfiguration Include="Release">
             <Key>Cfg_2</Key>
             <CfgParent>Base</CfgParent>

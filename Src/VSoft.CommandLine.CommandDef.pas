@@ -15,6 +15,7 @@ type
     FHelpText     : string;
     FUsage        : string;
     FVisible      : boolean;
+    FIsDefault    : boolean;
     FOptionsLookup      : TDictionary<string,IOptionDefintion>;
     //can't put unnamed options in dictionary, so we keep a list
     FUnnamedOptions     : TList<IOptionDefintion>;
@@ -29,8 +30,10 @@ type
     function GetAlias : string;
     function GetDescription : string;
     function GetHelpText : string;
+    function GetIsDefault : boolean;
     function GetUsage : string;
     function GetVisible : boolean;
+
     function TryGetOption(const name : string; var option : IOptionDefintion) : boolean;
     procedure Clear;
     procedure GetAllRegisteredOptions(const list : TList<IOptionDefintion>);
@@ -38,7 +41,7 @@ type
     procedure EmumerateCommandOptions(const proc : TConstProc<IOptionDefintion>);overload;
 
   public
-    constructor Create(const name : string; const alias : string; const usage : string; const description : string; const helpText : string; const visible : boolean);
+    constructor Create(const name : string; const alias : string; const usage : string; const description : string; const helpText : string; const visible : boolean; const isDefault : boolean = false);
     destructor Destroy;override;
 
   end;
@@ -72,7 +75,7 @@ begin
   FUnnamedOptions.Clear;
 end;
 
-constructor TCommandDefImpl.Create(const name: string; const alias : string;  const usage : string; const description : string; const helpText : string; const visible : boolean);
+constructor TCommandDefImpl.Create(const name: string; const alias : string;  const usage : string; const description : string; const helpText : string; const visible : boolean; const isDefault : boolean = false);
 begin
   FName               := name;
   FUsage              := usage;
@@ -80,6 +83,7 @@ begin
   FHelpText           := helpText;
   FAlias              := alias;
   FVisible            := visible;
+  FIsDefault          := isDefault;
 
   FOptionsLookup      := TDictionary<string,IOptionDefintion>.Create;
   FUnnamedOptions     := TList<IOptionDefintion>.Create;
@@ -158,6 +162,11 @@ end;
 function TCommandDefImpl.GetHelpText: string;
 begin
   result := FHelpText;
+end;
+
+function TCommandDefImpl.GetIsDefault: boolean;
+begin
+  result := FIsDefault;
 end;
 
 function TCommandDefImpl.GetName: string;

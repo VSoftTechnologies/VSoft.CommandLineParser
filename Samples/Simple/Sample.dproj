@@ -70,7 +70,6 @@
         <Manifest_File>None</Manifest_File>
         <VerInfo_Locale>1033</VerInfo_Locale>
         <DCC_MapFile>3</DCC_MapFile>
-        <Debugger_RunParams>--inputfile:&quot;c:\test folder\testfile.txt&quot; --outputfile:&quot;c:\test folder\testfile2.txt&quot;</Debugger_RunParams>
         <DCC_RemoteDebug>false</DCC_RemoteDebug>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Cfg_2)'!=''">
@@ -88,6 +87,7 @@
         <DCCReference Include="..\..\Src\VSoft.CommandLine.Parser.pas"/>
         <DCCReference Include="uSampleConfig.pas"/>
         <DCCReference Include="uSampleOptions.pas"/>
+        <DCCReference Include="..\..\Src\VSoft.CommandLine.Utils.pas"/>
         <BuildConfiguration Include="Release">
             <Key>Cfg_2</Key>
             <CfgParent>Base</CfgParent>
@@ -137,12 +137,6 @@
                 </Source>
             </Delphi.Personality>
             <Deployment>
-                <DeployFile LocalName="Win32\Debug\Sample.rsm" Configuration="Debug" Class="DebugSymbols">
-                    <Platform Name="Win32">
-                        <RemoteName>Sample.rsm</RemoteName>
-                        <Overwrite>true</Overwrite>
-                    </Platform>
-                </DeployFile>
                 <DeployFile LocalName="$(BDS)\Redist\osx32\libcgunwind.1.0.dylib" Class="DependencyModule">
                     <Platform Name="OSX32">
                         <Overwrite>true</Overwrite>
@@ -158,6 +152,7 @@
                 </DeployFile>
                 <DeployFile LocalName="Win32\Debug\Sample.exe" Configuration="Debug" Class="ProjectOutput">
                     <Platform Name="Win32">
+                        <RemoteName>Sample.exe</RemoteName>
                         <Overwrite>true</Overwrite>
                     </Platform>
                 </DeployFile>

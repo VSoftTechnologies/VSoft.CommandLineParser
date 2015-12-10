@@ -11,7 +11,8 @@ uses
   VSoft.CommandLine.Parser in '..\..\Src\VSoft.CommandLine.Parser.pas',
   VSoft.CommandLine.CommandDef in '..\..\Src\VSoft.CommandLine.CommandDef.pas',
   uCommandSampleConfig in 'uCommandSampleConfig.pas',
-  uCommandSampleOptions in 'uCommandSampleOptions.pas';
+  uCommandSampleOptions in 'uCommandSampleOptions.pas',
+  VSoft.CommandLine.Utils in '..\..\Src\VSoft.CommandLine.Utils.pas';
 
 {
 Note : The Options are registered in uSampleOptions
@@ -26,7 +27,6 @@ begin
     if parseresult.HasErrors then
     begin
       Writeln(parseresult.ErrorText);
-      Writeln('Usage :');
       TOptionsRegistry.PrintUsage(
         procedure(const value : string)
         begin
@@ -35,9 +35,21 @@ begin
     end
     else
     begin
-      WriteLn('Command : ' + parseresult.Command);
-      Writeln('Install Path : ' + TInstallOptions.InstallPath );
-      Writeln('Help Command : ' + THelpOptions.HelpCommand );
+      if parseresult.Command = '' then
+      begin
+        Writeln('Usage : commandsample [command] [options]');
+        TOptionsRegistry.PrintUsage(
+          procedure (const value : string)
+          begin
+            WriteLn(value);
+          end);
+      end
+      else
+      begin
+        WriteLn('Command : ' + parseresult.Command);
+        Writeln('Install Path : ' + TInstallOptions.InstallPath );
+        Writeln('Help Command : ' + THelpOptions.HelpCommand );
+      end;
     end;
     ReadLn;
   except

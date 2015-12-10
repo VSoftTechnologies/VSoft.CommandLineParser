@@ -36,7 +36,8 @@ uses
   VSoft.CommandLine.Options in '..\..\Src\VSoft.CommandLine.Options.pas',
   VSoft.CommandLine.Parser in '..\..\Src\VSoft.CommandLine.Parser.pas',
   uSampleConfig in 'uSampleConfig.pas',
-  uSampleOptions in 'uSampleOptions.pas';
+  uSampleOptions in 'uSampleOptions.pas',
+  VSoft.CommandLine.Utils in '..\..\Src\VSoft.CommandLine.Utils.pas';
 
 {
 Note : The Options are registered in uSampleOptions

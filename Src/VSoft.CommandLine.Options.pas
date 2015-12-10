@@ -103,6 +103,7 @@ type
     function GetHelpText : string;
     function GetUsage : string;
     function GetVisible : boolean;
+    function GetIsDefault : boolean;
     procedure AddOption(const value : IOptionDefintion);
     function TryGetOption(const name : string; var option : IOptionDefintion) : boolean;
     function HasOption(const name : string) : boolean;
@@ -114,6 +115,7 @@ type
     property Alias : string read GetAlias;
     property Description : string read GetDescription;
     property HelpText : string read GetHelpText;
+    property IsDefault : boolean read GetIsDefault;
     property Usage : string read GetUsage;
     property RegisteredOptions : TList<IOptionDefintion> read GetRegisteredOptions;
     property RegisteredUnamedOptions : TList<IOptionDefintion> read GetUnNamedOptions;
@@ -150,6 +152,9 @@ type
       FNameValueSeparator: string;
       FDefaultCommand : TCommandDefinition;
       FCommandDefs : TDictionary<string,ICommandDefinition>;
+      FDescriptionTab : integer;
+      FConsoleWidth : integer;
+
   protected
     class function GetDefaultCommand: ICommandDefinition; static;
   protected
@@ -180,6 +185,7 @@ type
     class function GetCommandByName(const name : string) : ICommandDefinition;
 
     class property NameValueSeparator: string read FNameValueSeparator write FNameValueSeparator;
+    class property DescriptionTab : integer read FDescriptionTab write FDescriptionTab;
     class property DefaultCommand : ICommandDefinition read GetDefaultCommand;
     class property RegisteredCommands : TDictionary<string,ICommandDefinition> read FCommandDefs;
 
@@ -190,66 +196,10 @@ implementation
 uses
   Generics.Defaults,
   System.StrUtils,
+  VSoft.CommandLine.Utils,
   VSoft.CommandLine.Parser,
   VSoft.Commandline.OptionDef,
   VSoft.CommandLine.CommandDef;
-
-function SplitStringAt(const len : integer; const value : string) : TArray<string>;
-var
-  l : integer;
-  idx  : integer;
-  count : integer;
-begin
-  SetLength(result,0); //to quieten down fix insight.
-  l := length(value);
-  if l < len then
-  begin
-    SetLength(result,1);
-    result[0] := value;
-    exit;
-  end;
-
-  idx    := 1;
-  count := 0;
-  while idx <= l do
-  begin
-    Inc(count);
-    SetLength(result,count);
-    result[count -1] := Copy(value, idx, len);
-    Inc(idx, len);
-  end;
-end;
-
-function SplitDescription(const value : string; const maxLen : integer) : TArray<string>;
-var
-  descStrings : TArray<string>;
-  splitStrings : TArray<string>;
-  i : integer;
-  j : integer;
-  k : integer;
-  l : integer;
-  s : string;
-begin
-  SetLength(result,0); //to quieten down fix insight.
-  splitStrings := TArray<string>(SplitString(value,#13#10));
-  k := 0;
-
-  for i := 0 to Length(splitStrings) -1 do
-  begin
-    descStrings := SplitStringAt(maxLen,splitStrings[i]);
-    j := k;
-    l := Length(descStrings);
-    Inc(k,l);
-    SetLength(result,k);
-    for s in descStrings do
-    begin
-      result[j] := s.Trim;
-      Inc(j);
-    end;
-  end;
-end;
-
-
 
 { TOptionsRegistry }
 
@@ -286,10 +236,12 @@ class constructor TOptionsRegistry.Create;
 var
   cmdDef : ICommandDefinition;
 begin
-  cmdDef := TCommandDefImpl.Create('','','','','',true);
+  cmdDef := TCommandDefImpl.Create('','','','','',false,true);
   FDefaultCommand := TCommandDefinition.Create(cmdDef);
   FCommandDefs := TDictionary<string,ICommandDefinition>.Create;
   FNameValueSeparator := ':';
+  FDescriptionTab := 14;
+  FConsoleWidth := GetConsoleWidth;
 end;
 
 class destructor TOptionsRegistry.Destroy;
@@ -358,15 +310,60 @@ begin
 end;
 
 class procedure TOptionsRegistry.PrintUsage(const command: ICommandDefinition; const proc: TConstProc<string>);
+var
+  maxDescW : integer;
 begin
-  proc('usage: ' + command.Usage);
-  proc('');
-  proc(command.Description);
-  if command.HelpText <> '' then
+  if not command.IsDefault then
   begin
+    proc('usage: ' + command.Usage);
     proc('');
-    proc('   ' + command.HelpText);
-  end;
+    proc(command.Description);
+    if command.HelpText <> '' then
+    begin
+      proc('');
+      proc('   ' + command.HelpText);
+    end;
+    proc('options :');
+  end
+  else
+    proc('global options :');
+
+  if FConsoleWidth < High(Integer) then
+    maxDescW := FConsoleWidth
+  else
+    maxDescW := High(Integer);
+
+  maxDescW := maxDescW - FDescriptionTab;
+
+  command.EmumerateCommandOptions(
+    procedure(const opt : IOptionDefintion)
+    var
+       descStrings : TArray<string>;
+       i : integer;
+       numDescStrings : integer;
+       al : integer;
+       s  : string;
+    begin
+      descStrings := SplitDescription(opt.HelpText,maxDescW);
+      al := Length(opt.ShortName);
+      if al <> 0 then
+        Inc(al,5); //ad backets and 2 spaces;
+
+      s := ' -' + opt.LongName.PadRight(descriptionTab -1 - al);
+      if al > 0 then
+        s := s + '(-' + opt.ShortName + ')' + '  ';
+      s := s + descStrings[0];
+      proc(s);
+  //          FConsole.WriteLine(' -' + name.PadRight(descriptionTab -1) + descStrings[0]);
+      numDescStrings := Length(descStrings);
+      if numDescStrings > 1 then
+      begin
+        for i := 1 to numDescStrings -1 do
+          proc(''.PadRight(descriptionTab) + descStrings[i]);
+      end;
+
+    end);
+
 end;
 
 class procedure TOptionsRegistry.PrintUsage(const commandName: string; const proc: TConstProc<string>);
@@ -390,17 +387,39 @@ end;
 class procedure TOptionsRegistry.PrintUsage(const proc: TConstProc<string>);
 var
   cmd : ICommandDefinition;
+  descStrings : TArray<string>;
+  i : integer;
+  numDescStrings : integer;
+  maxDescW : integer;
 begin
-  for cmd in FCommandDefs.Values do
+  proc('');
+  if FCommandDefs.Count > 0 then
   begin
-    if cmd.Visible then
+    if FConsoleWidth < High(Integer) then
+      maxDescW := FConsoleWidth
+    else
+      maxDescW := High(Integer);
+     maxDescW := maxDescW - FDescriptionTab;
+
+    for cmd in FCommandDefs.Values do
     begin
-      proc('Command options:');
-      PrintUsage(cmd,proc);
+      if cmd.Visible then
+      begin
+        descStrings := SplitDescription(cmd.Description,maxDescW);
+        proc(' ' + cmd.Name.PadRight(descriptionTab -1) + descStrings[0]);
+        numDescStrings := Length(descStrings);
+        if numDescStrings > 1 then
+        begin
+          for i := 1 to numDescStrings -1 do
+            proc(''.PadRight(descriptionTab) + descStrings[i]);
+        end;
+        proc('');
+      end;
     end;
-  end;
-  proc('Global options:');
-  PrintUsage(FDefaultCommand.FCommandDef,proc);
+    PrintUsage(FDefaultCommand.FCommandDef,proc);
+  end
+  else
+    PrintUsage(FDefaultCommand.FCommandDef,proc);
 end;
 
 class function TOptionsRegistry.RegisterOption<T>(const longName, shortName, helpText: string; const Action: TConstProc<T>): IOptionDefintion;
@@ -523,5 +542,9 @@ begin
     cmdList.Free;
   end;
 end;
+
+initialization
+
+
 
 end.
