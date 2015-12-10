@@ -389,8 +389,11 @@ var
 begin
   for cmd in FCommandDefs.Values do
   begin
-    proc('Command options:');
-    PrintUsage(cmd,proc);
+    if cmd.Visible then
+    begin
+      proc('Command options:');
+      PrintUsage(cmd,proc);
+    end;
   end;
   proc('Global options:');
   PrintUsage(FDefaultCommand.FCommandDef,proc);
