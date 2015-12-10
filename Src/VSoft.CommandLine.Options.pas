@@ -165,17 +165,20 @@ type
 
     class function Parse: ICommandLineParseResult;overload;
     class function Parse(const values : TStrings) : ICommandLineParseResult;overload;
-    class property RegisteredCommands : TDictionary<string,ICommandDefinition> read FCommandDefs;
+
     class procedure PrintUsage(const proc : TConstProc<string>);overload;
     class procedure PrintUsage(const commandName : string; const proc : TConstProc<string>);overload;
     class procedure PrintUsage(const command : ICommandDefinition; const proc : TConstProc<string>);overload;
 
     class procedure EnumerateCommands(const proc : TConstProc<string,string>);
     class procedure EmumerateCommandOptions(const commandName : string; const proc : TConstProc<string,string, string>);
+
     class function GetCommandByName(const name : string) : ICommandDefinition;
 
     class property NameValueSeparator: string read FNameValueSeparator write FNameValueSeparator;
     class property DefaultCommand : ICommandDefinition read GetDefaultCommand;
+    class property RegisteredCommands : TDictionary<string,ICommandDefinition> read FCommandDefs;
+
   end;
 
 implementation
