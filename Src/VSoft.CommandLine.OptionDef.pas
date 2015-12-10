@@ -46,8 +46,8 @@ type
 
   TOptionDefinition<T> = class(TInterfacedObject,IOptionDefintion,IOptionDefInvoke)
   private
-    FLongName : string;
-    FShortName : string;
+    FLongName       : string;
+    FShortName      : string;
     FHelpText       : string;
     FHasValue       : boolean;
     FRequired       : boolean;

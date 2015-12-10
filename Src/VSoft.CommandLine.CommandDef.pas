@@ -12,6 +12,7 @@ type
     FName         : string;
     FAlias        : string;
     FDescription  : string;
+    FHelpText     : string;
     FUsage        : string;
     FVisible      : boolean;
     FOptionsLookup      : TDictionary<string,IOptionDefintion>;
@@ -27,14 +28,16 @@ type
     function GetName : string;
     function GetAlias : string;
     function GetDescription : string;
+    function GetHelpText : string;
     function GetUsage : string;
     function GetVisible : boolean;
     function TryGetOption(const name : string; var option : IOptionDefintion) : boolean;
     procedure Clear;
     procedure GetAllRegisteredOptions(const list : TList<IOptionDefintion>);
+    procedure EmumerateCommandOptions(const proc : TConstProc<string,string, string>);
 
   public
-    constructor Create(const name : string; const alias : string; const usage : string; const description : string; const visible : boolean);
+    constructor Create(const name : string; const alias : string; const usage : string; const description : string; const helpText : string; const visible : boolean);
     destructor Destroy;override;
 
   end;
@@ -42,6 +45,7 @@ type
 implementation
 
 uses
+  Generics.Defaults,
   System.SysUtils;
 
 { TCommandDef }
@@ -67,11 +71,12 @@ begin
   FUnnamedOptions.Clear;
 end;
 
-constructor TCommandDefImpl.Create(const name: string; const alias : string;  const usage : string; const description : string; const visible : boolean);
+constructor TCommandDefImpl.Create(const name: string; const alias : string;  const usage : string; const description : string; const helpText : string; const visible : boolean);
 begin
   FName               := name;
   FUsage              := usage;
   FDescription        := description;
+  FHelpText           := helpText;
   FAlias              := alias;
   FVisible            := visible;
 
@@ -88,6 +93,29 @@ begin
   inherited;
 end;
 
+procedure TCommandDefImpl.EmumerateCommandOptions(const proc: TConstProc<string, string, string>);
+var
+  optionList : TList<IOptionDefintion>;
+  opt : IOptionDefintion;
+begin
+  optionList := TList<IOptionDefintion>.Create;
+  try
+    optionList.AddRange(FRegisteredOptions);
+
+    optionList.Sort(TComparer<IOptionDefintion>.Construct(
+      function (const L, R: IOptionDefintion): integer
+      begin
+        Result := CompareText(L.LongName,R.LongName);
+      end));
+
+    for opt in optionList do
+      proc(opt.LongName,opt.ShortName, opt.HelpText);
+  finally
+    optionList.Free;
+  end;
+
+end;
+
 function TCommandDefImpl.GetAlias: string;
 begin
   result := FAlias;
@@ -102,6 +130,11 @@ end;
 function TCommandDefImpl.GetDescription: string;
 begin
   result := FDescription;
+end;
+
+function TCommandDefImpl.GetHelpText: string;
+begin
+  result := FHelpText;
 end;
 
 function TCommandDefImpl.GetName: string;
