@@ -240,7 +240,7 @@ begin
   FDefaultCommand := TCommandDefinition.Create(cmdDef);
   FCommandDefs := TDictionary<string,ICommandDefinition>.Create;
   FNameValueSeparator := ':';
-  FDescriptionTab := 14;
+  FDescriptionTab := 15;
   FConsoleWidth := GetConsoleWidth;
 end;
 
@@ -323,10 +323,19 @@ begin
       proc('');
       proc('   ' + command.HelpText);
     end;
+    proc('');
     proc('options :');
+    proc('');
   end
   else
-    proc('global options :');
+  begin
+    proc('');
+    if FCommandDefs.Count > 0 then
+      proc('global options :')
+    else
+      proc('options :');
+    proc('');
+  end;
 
   if FConsoleWidth < High(Integer) then
     maxDescW := FConsoleWidth

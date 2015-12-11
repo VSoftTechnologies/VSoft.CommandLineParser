@@ -26,7 +26,11 @@ begin
     parseresult := TOptionsRegistry.Parse;
     if parseresult.HasErrors then
     begin
+      Writeln('Invalid options :');
+      Writeln;
       Writeln(parseresult.ErrorText);
+      Writeln;
+      Writeln('Usage : commandsample [command] [options]');
       TOptionsRegistry.PrintUsage(
         procedure(const value : string)
         begin
@@ -37,6 +41,7 @@ begin
     begin
       if parseresult.Command = '' then
       begin
+        Writeln;
         Writeln('Usage : commandsample [command] [options]');
         TOptionsRegistry.PrintUsage(
           procedure (const value : string)

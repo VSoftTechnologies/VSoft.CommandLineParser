@@ -51,8 +51,9 @@ begin
     parseresult := TOptionsRegistry.Parse;
     if parseresult.HasErrors then
     begin
+      Writeln('Invalid command line :');
+      Writeln;
       Writeln(parseresult.ErrorText);
-      Writeln('Usage :');
       TOptionsRegistry.PrintUsage(
         procedure(const value : string)
         begin
