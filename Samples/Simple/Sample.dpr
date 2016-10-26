@@ -54,6 +54,7 @@ begin
       Writeln('Invalid command line :');
       Writeln;
       Writeln(parseresult.ErrorText);
+      TOptionsRegistry.DescriptionTab := 20;
       TOptionsRegistry.PrintUsage(
         procedure(const value : string)
         begin
