@@ -206,7 +206,7 @@ begin
     begin
       if option.HasValue and (value = '') then
       begin
-        parseResult.AddError('Option [' + key +'] expected a following :value but none was found');
+        parseResult.AddError('Option [' + key +'] expected a following ' +FNameValueSeparator+'<value> but none was found');
         continue;
       end;
       if option.IsOptionFile then
