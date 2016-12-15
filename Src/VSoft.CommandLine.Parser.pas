@@ -279,6 +279,18 @@ begin
     end;
   end;
 
+  for option in TOptionsRegistry.DefaultCommand.RegisteredUnamedOptions do
+  begin
+    if option.Required then
+    begin
+      if not (option as IOptionDefInvoke).WasFound then
+      begin
+        parseResult.AddError('Missing required unnamed parameter(s)');
+        Break;
+      end;
+    end;
+  end;
+
   if parseResult.command <> nil then
   begin
     for option in parseResult.command.RegisteredOptions do
