@@ -356,7 +356,7 @@ begin
       descStrings := SplitDescription(opt.HelpText,maxDescW);
       al := Length(opt.ShortName);
       if al <> 0 then
-        Inc(al,5); //ad backets and 2 spaces;
+        Inc(al,5); //add brackets and 2 spaces;
 
       s := ' -' + opt.LongName.PadRight(descriptionTab -1 - al);
       if al > 0 then
@@ -368,7 +368,7 @@ begin
       if numDescStrings > 1 then
       begin
         for i := 1 to numDescStrings -1 do
-          proc(''.PadRight(descriptionTab) + descStrings[i]);
+          proc(''.PadRight(descriptionTab +1) + descStrings[i]);
       end;
 
     end);

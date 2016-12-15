@@ -51,7 +51,8 @@ var
   s : string;
 begin
   SetLength(result,0); //to quieten down fix insight.
-  splitStrings := TArray<string>(SplitString(value,#13#10));
+  s := StringReplace(value,sLineBreak,#13,[rfReplaceAll]); // Otherwise a CRLF will result in two lines.
+  splitStrings := TArray<string>(SplitString(s,#13#10));   // Splits at each CR *and* each LF!
   k := 0;
 
   for i := 0 to Length(splitStrings) -1 do

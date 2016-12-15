@@ -39,14 +39,14 @@ procedure ConfigureOptions;
 var
   option : IOptionDefintion;
 begin
-  option := TOptionsRegistry.RegisterOption<string>('inputfile','i','The file to be processed',
+  option := TOptionsRegistry.RegisterOption<string>('inputfile','i','The file to be processed' + sLineBreak + 'if you dare!',
     procedure(const value : string)
     begin
         TSampleOptions.InputFile := value;
     end);
   option.Required := true;
 
-  option := TOptionsRegistry.RegisterOption<string>('outputfile','o','The processed output file',
+  option := TOptionsRegistry.RegisterOption<string>('outputfile','out','The processed output file',
     procedure(const value : string)
     begin
         TSampleOptions.OutputFile := value;

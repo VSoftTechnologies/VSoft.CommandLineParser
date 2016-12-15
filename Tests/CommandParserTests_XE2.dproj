@@ -84,6 +84,7 @@
         <DCCReference Include="..\Src\VSoft.CommandLine.Options.pas"/>
         <DCCReference Include="..\Src\VSoft.CommandLine.Parser.pas"/>
         <DCCReference Include="..\Src\VSoft.CommandLine.CommandDef.pas"/>
+        <DCCReference Include="..\Src\VSoft.CommandLine.Utils.pas"/>
         <BuildConfiguration Include="Release">
             <Key>Cfg_2</Key>
             <CfgParent>Base</CfgParent>
