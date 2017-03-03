@@ -59,7 +59,7 @@ type
   end;
 
 
-  IOptionDefintion = interface
+  IOptionDefinition = interface
   ['{1EAA06BA-8FBF-43F8-86D7-9F5DE26C4E86}']
     function GetLongName : string;
     function GetShortName : string;
@@ -94,9 +94,9 @@ type
 
   ICommandDefinition = interface
   ['{58199FE2-19DF-4F9B-894F-BD1C5B62E0CB}']
-    function GetRegisteredOptions : TList<IOptionDefintion>;
-    function GetUnNamedOptions  : TList<IOptionDefintion>;
-    procedure GetAllRegisteredOptions(const list : TList<IOptionDefintion>);
+    function GetRegisteredOptions : TList<IOptionDefinition>;
+    function GetUnNamedOptions  : TList<IOptionDefinition>;
+    procedure GetAllRegisteredOptions(const list : TList<IOptionDefinition>);
     function GetName : string;
     function GetAlias : string;
     function GetDescription : string;
@@ -104,12 +104,12 @@ type
     function GetUsage : string;
     function GetVisible : boolean;
     function GetIsDefault : boolean;
-    procedure AddOption(const value : IOptionDefintion);
-    function TryGetOption(const name : string; var option : IOptionDefintion) : boolean;
+    procedure AddOption(const value : IOptionDefinition);
+    function TryGetOption(const name : string; var option : IOptionDefinition) : boolean;
     function HasOption(const name : string) : boolean;
     procedure Clear;
     procedure EmumerateCommandOptions(const proc : TConstProc<string,string, string>);overload;
-    procedure EmumerateCommandOptions(const proc : TConstProc<IOptionDefintion>);overload;
+    procedure EmumerateCommandOptions(const proc : TConstProc<IOptionDefinition>);overload;
 
     property Name : string read GetName;
     property Alias : string read GetAlias;
@@ -117,8 +117,8 @@ type
     property HelpText : string read GetHelpText;
     property IsDefault : boolean read GetIsDefault;
     property Usage : string read GetUsage;
-    property RegisteredOptions : TList<IOptionDefintion> read GetRegisteredOptions;
-    property RegisteredUnamedOptions : TList<IOptionDefintion> read GetUnNamedOptions;
+    property RegisteredOptions : TList<IOptionDefinition> read GetRegisteredOptions;
+    property RegisteredUnamedOptions : TList<IOptionDefinition> read GetUnNamedOptions;
     property Visible : boolean read GetVisible;
   end;
 
@@ -132,10 +132,10 @@ type
     function GetUsage : string;
     function GetAlias : string;
   public
-    function RegisterOption<T>(const longName: string; const Action : TConstProc<T>) : IOptionDefintion;overload;
-    function RegisterOption<T>(const longName: string; const shortName : string; const Action : TConstProc<T>) : IOptionDefintion;overload;
-    function RegisterOption<T>(const longName: string; const shortName : string; const helpText : string; const Action : TConstProc<T>) : IOptionDefintion;overload;
-    function RegisterUnNamedOption<T>(const helpText : string; const Action : TConstProc<T>) : IOptionDefintion;overload;
+    function RegisterOption<T>(const longName: string; const Action : TConstProc<T>) : IOptionDefinition;overload;
+    function RegisterOption<T>(const longName: string; const shortName : string; const Action : TConstProc<T>) : IOptionDefinition;overload;
+    function RegisterOption<T>(const longName: string; const shortName : string; const helpText : string; const Action : TConstProc<T>) : IOptionDefinition;overload;
+    function RegisterUnNamedOption<T>(const helpText : string; const Action : TConstProc<T>) : IOptionDefinition;overload;
     function HasOption(const value : string) : boolean;
     constructor Create(const commandDef : ICommandDefinition);
     property Name : string read GetName;
@@ -162,10 +162,10 @@ type
     class destructor Destroy;
   public
     class procedure Clear; //use for testing only;
-    class function RegisterOption<T>(const longName: string; const Action : TConstProc<T>) : IOptionDefintion;overload;
-    class function RegisterOption<T>(const longName: string; const shortName : string; const Action : TConstProc<T>) : IOptionDefintion;overload;
-    class function RegisterOption<T>(const longName: string; const shortName : string; const helpText : string; const Action : TConstProc<T>) : IOptionDefintion;overload;
-    class function RegisterUnNamedOption<T>(const helpText : string; const Action : TConstProc<T>) : IOptionDefintion;overload;
+    class function RegisterOption<T>(const longName: string; const Action : TConstProc<T>) : IOptionDefinition;overload;
+    class function RegisterOption<T>(const longName: string; const shortName : string; const Action : TConstProc<T>) : IOptionDefinition;overload;
+    class function RegisterOption<T>(const longName: string; const shortName : string; const helpText : string; const Action : TConstProc<T>) : IOptionDefinition;overload;
+    class function RegisterUnNamedOption<T>(const helpText : string; const Action : TConstProc<T>) : IOptionDefinition;overload;
 
     class function RegisterCommand(const name : string; const alias : string; const description : string; const helpString : string; const usage : string; const visible : boolean = true) : TCommandDefinition;
 
@@ -180,7 +180,7 @@ type
     class procedure EnumerateCommands(const proc : TConstProc<ICommandDefinition>);overload;
 
     class procedure EmumerateCommandOptions(const commandName : string; const proc : TConstProc<string,string, string>);overload;
-    class procedure EmumerateCommandOptions(const commandName : string; const proc : TConstProc<IOptionDefintion>);overload;
+    class procedure EmumerateCommandOptions(const commandName : string; const proc : TConstProc<IOptionDefinition>);overload;
 
     class function GetCommandByName(const name : string) : ICommandDefinition;
 
@@ -203,7 +203,7 @@ uses
 
 { TOptionsRegistry }
 
-class function TOptionsRegistry.RegisterOption<T>(const longName, shortName: string; const Action: TConstProc<T>): IOptionDefintion;
+class function TOptionsRegistry.RegisterOption<T>(const longName, shortName: string; const Action: TConstProc<T>): IOptionDefinition;
 begin
   result := FDefaultCommand.RegisterOption<T>(longName,shortName,Action);
 end;
@@ -345,7 +345,7 @@ begin
   maxDescW := maxDescW - FDescriptionTab;
 
   command.EmumerateCommandOptions(
-    procedure(const opt : IOptionDefintion)
+    procedure(const opt : IOptionDefinition)
     var
        descStrings : TArray<string>;
        i : integer;
@@ -431,18 +431,18 @@ begin
     PrintUsage(FDefaultCommand.FCommandDef,proc);
 end;
 
-class function TOptionsRegistry.RegisterOption<T>(const longName, shortName, helpText: string; const Action: TConstProc<T>): IOptionDefintion;
+class function TOptionsRegistry.RegisterOption<T>(const longName, shortName, helpText: string; const Action: TConstProc<T>): IOptionDefinition;
 begin
   result := RegisterOption<T>(longName,shortName,Action);
   result.HelpText := helpText;
 end;
 
-class function TOptionsRegistry.RegisterOption<T>(const longName: string; const Action: TConstProc<T>): IOptionDefintion;
+class function TOptionsRegistry.RegisterOption<T>(const longName: string; const Action: TConstProc<T>): IOptionDefinition;
 begin
   result := RegisterOption<T>(longName,'',Action);
 end;
 
-class function TOptionsRegistry.RegisterUnNamedOption<T>(const helpText: string; const Action: TConstProc<T>): IOptionDefintion;
+class function TOptionsRegistry.RegisterUnNamedOption<T>(const helpText: string; const Action: TConstProc<T>): IOptionDefinition;
 begin
   result := FDefaultCommand.RegisterUnNamedOption<T>(helpText,Action);
 end;
@@ -455,12 +455,12 @@ begin
 end;
 
 
-function TCommandDefinition.RegisterOption<T>(const longName: string; const Action: TConstProc<T>): IOptionDefintion;
+function TCommandDefinition.RegisterOption<T>(const longName: string; const Action: TConstProc<T>): IOptionDefinition;
 begin
   result := RegisterOption<T>(longName,'',Action);
 end;
 
-function TCommandDefinition.RegisterOption<T>(const longName, shortName: string; const Action: TConstProc<T>): IOptionDefintion;
+function TCommandDefinition.RegisterOption<T>(const longName, shortName: string; const Action: TConstProc<T>): IOptionDefinition;
 begin
   if longName = '' then
     raise Exception.Create('Name required - use RegisterUnamed to register unamed options');
@@ -501,13 +501,13 @@ begin
   result := FCommandDef.HasOption(value);
 end;
 
-function TCommandDefinition.RegisterOption<T>(const longName, shortName, helpText: string; const Action: TConstProc<T>): IOptionDefintion;
+function TCommandDefinition.RegisterOption<T>(const longName, shortName, helpText: string; const Action: TConstProc<T>): IOptionDefinition;
 begin
   result := RegisterOption<T>(longName,shortName,Action);
   result.HelpText := helpText;
 end;
 
-function TCommandDefinition.RegisterUnNamedOption<T>(const helpText: string; const Action: TConstProc<T>): IOptionDefintion;
+function TCommandDefinition.RegisterUnNamedOption<T>(const helpText: string; const Action: TConstProc<T>): IOptionDefinition;
 begin
   result := TOptionDefinition<T>.Create('','',helptext,Action);
   result.HasValue := false;
@@ -515,7 +515,7 @@ begin
 end;
 
 
-class procedure TOptionsRegistry.EmumerateCommandOptions(const commandName: string; const proc: TConstProc<IOptionDefintion>);
+class procedure TOptionsRegistry.EmumerateCommandOptions(const commandName: string; const proc: TConstProc<IOptionDefinition>);
 var
   cmd : ICommandDefinition;
 begin

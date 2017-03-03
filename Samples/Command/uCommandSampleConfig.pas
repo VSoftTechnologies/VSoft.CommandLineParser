@@ -12,7 +12,7 @@ uses
 procedure ConfigureOptions;
 var
   cmd    : TCommandDefinition;
-  option : IOptionDefintion;
+  option : IOptionDefinition;
 begin
   option := TOptionsRegistry.RegisterOption<boolean>('verbose','v','verbose output',
     procedure(const value : boolean)

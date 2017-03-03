@@ -110,7 +110,7 @@ uses
 
 procedure TCommandLineParserTests.Can_Parse_Enum_Parameter;
 var
-  def : IOptionDefintion;
+  def : IOptionDefinition;
   test : TExampleEnum;
   sList : TStringList;
   parseResult : ICommandLineParseResult;
@@ -135,7 +135,7 @@ end;
 
 procedure TCommandLineParserTests.Can_Parse_Multiple_Unnamed_Parameters;
 var
-  def : IOptionDefintion;
+  def : IOptionDefinition;
   file1 : string;
   file2 : string;
   sList : TStringList;
@@ -177,7 +177,7 @@ end;
 
 procedure TCommandLineParserTests.Can_Parse_Quoted_Value;
 var
-  def : IOptionDefintion;
+  def : IOptionDefinition;
   test : string;
   test2 : string;
   parseResult : ICommandLineParseResult;
@@ -209,7 +209,7 @@ end;
 
 procedure TCommandLineParserTests.Can_Parse_Set_Parameter;
 var
-  def : IOptionDefintion;
+  def : IOptionDefinition;
   test : TExampleSet;
   sList : TStringList;
   parseResult : ICommandLineParseResult;
@@ -234,7 +234,7 @@ end;
 
 procedure TCommandLineParserTests.Can_Parse_EqualNameValueSeparator;
 var
-  def : IOptionDefintion;
+  def : IOptionDefinition;
   test : string;
   parseResult : ICommandLineParseResult;
   sList : TStringList;
@@ -258,7 +258,7 @@ end;
 
 procedure TCommandLineParserTests.Can_Parse_ColonEqualNameValueSeparator;
 var
-  def : IOptionDefintion;
+  def : IOptionDefinition;
   test : string;
   parseResult : ICommandLineParseResult;
   sList : TStringList;
@@ -283,7 +283,7 @@ end;
 
 procedure TCommandLineParserTests.Can_Parse_Unnamed_Parameter;
 var
-  def : IOptionDefintion;
+  def : IOptionDefinition;
   res : string;
   sList : TStringList;
   parseResult : ICommandLineParseResult;
@@ -307,7 +307,7 @@ end;
 
 procedure TCommandLineParserTests.Can_Register_Unnamed_Parameter;
 var
-  def : IOptionDefintion;
+  def : IOptionDefinition;
 begin
   def := TOptionsRegistry.RegisterUnNamedOption<string>('the file we want to process',
                   procedure(const value : string)
@@ -330,7 +330,7 @@ end;
 
 procedure TCommandLineParserTests.Test_Single_Option;
 var
-  def : IOptionDefintion;
+  def : IOptionDefinition;
   result : boolean;
   parseResult : ICommandLineParseResult;
   sList : TStringList;
@@ -356,7 +356,7 @@ end;
 
 procedure TCommandLineParserTests.Will_Generate_Error_For_Extra_Unamed_Parameter;
 var
-  def : IOptionDefintion;
+  def : IOptionDefinition;
   file1 : string;
   sList : TStringList;
   parseResult : ICommandLineParseResult;
@@ -392,7 +392,7 @@ end;
 
 procedure TCommandLineParserTests.Will_Generate_Error_For_Missing_Value;
 var
-  def : IOptionDefintion;
+  def : IOptionDefinition;
   result : boolean;
   parseResult : ICommandLineParseResult;
   sList : TStringList;
@@ -434,7 +434,7 @@ end;
 
 procedure TCommandLineParserTests.Will_Raise_For_Missing_Param_File;
 var
-  def : IOptionDefintion;
+  def : IOptionDefinition;
   parseResult : ICommandLineParseResult;
   sList : TStringList;
 begin
@@ -509,7 +509,7 @@ end;
 
 procedure TCommandLineParserTests.Will_Generate_Error_For_Invalid_Enum;
 var
-  def : IOptionDefintion;
+  def : IOptionDefinition;
   test : TExampleEnum;
   sList : TStringList;
   parseResult : ICommandLineParseResult;
@@ -534,7 +534,7 @@ end;
 
 procedure TCommandLineParserTests.Will_Generate_Error_For_Invalid_Set;
 var
-  def : IOptionDefintion;
+  def : IOptionDefinition;
   test : TExampleSet;
   sList : TStringList;
   parseResult : ICommandLineParseResult;

@@ -119,7 +119,7 @@ var
   j : integer;
   value : string;
   key : string;
-  option : IOptionDefintion;
+  option : IOptionDefinition;
   currentCommand : ICommandDefinition;
   newCommand     : ICommandDefinition;
   defaultCommand : ICommandDefinition;
@@ -266,7 +266,7 @@ end;
 
 procedure TCommandLineParser.InternalValidate(const parseResult: IInternalParseResult);
 var
-  option : IOptionDefintion;
+  option : IOptionDefinition;
 begin
   for option in TOptionsRegistry.DefaultCommand.RegisteredOptions do
   begin

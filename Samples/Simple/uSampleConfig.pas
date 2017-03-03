@@ -37,7 +37,7 @@ uses
 
 procedure ConfigureOptions;
 var
-  option : IOptionDefintion;
+  option : IOptionDefinition;
 begin
   option := TOptionsRegistry.RegisterOption<string>('inputfile','i','The file to be processed' + sLineBreak + 'if you dare!',
     procedure(const value : string)

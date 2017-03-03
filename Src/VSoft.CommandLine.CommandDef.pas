@@ -16,16 +16,16 @@ type
     FUsage        : string;
     FVisible      : boolean;
     FIsDefault    : boolean;
-    FOptionsLookup      : TDictionary<string,IOptionDefintion>;
+    FOptionsLookup      : TDictionary<string,IOptionDefinition>;
     //can't put unnamed options in dictionary, so we keep a list
-    FUnnamedOptions     : TList<IOptionDefintion>;
+    FUnnamedOptions     : TList<IOptionDefinition>;
     //all registered options.
-    FRegisteredOptions  : TList<IOptionDefintion>;
+    FRegisteredOptions  : TList<IOptionDefinition>;
   protected
-    procedure AddOption(const value: IOptionDefintion);
+    procedure AddOption(const value: IOptionDefinition);
     function HasOption(const name : string) : boolean;
-    function GetRegisteredOptions : TList<IOptionDefintion>;
-    function GetUnNamedOptions  : TList<IOptionDefintion>;
+    function GetRegisteredOptions : TList<IOptionDefinition>;
+    function GetUnNamedOptions  : TList<IOptionDefinition>;
     function GetName : string;
     function GetAlias : string;
     function GetDescription : string;
@@ -34,11 +34,11 @@ type
     function GetUsage : string;
     function GetVisible : boolean;
 
-    function TryGetOption(const name : string; var option : IOptionDefintion) : boolean;
+    function TryGetOption(const name : string; var option : IOptionDefinition) : boolean;
     procedure Clear;
-    procedure GetAllRegisteredOptions(const list : TList<IOptionDefintion>);
+    procedure GetAllRegisteredOptions(const list : TList<IOptionDefinition>);
     procedure EmumerateCommandOptions(const proc : TConstProc<string,string, string>);overload;
-    procedure EmumerateCommandOptions(const proc : TConstProc<IOptionDefintion>);overload;
+    procedure EmumerateCommandOptions(const proc : TConstProc<IOptionDefinition>);overload;
 
   public
     constructor Create(const name : string; const alias : string; const usage : string; const description : string; const helpText : string; const visible : boolean; const isDefault : boolean = false);
@@ -54,7 +54,7 @@ uses
 
 { TCommandDef }
 
-procedure TCommandDefImpl.AddOption(const value: IOptionDefintion);
+procedure TCommandDefImpl.AddOption(const value: IOptionDefinition);
 begin
   if value.IsUnnamed then
     FUnNamedOptions.Add(value)
@@ -85,9 +85,9 @@ begin
   FVisible            := visible;
   FIsDefault          := isDefault;
 
-  FOptionsLookup      := TDictionary<string,IOptionDefintion>.Create;
-  FUnnamedOptions     := TList<IOptionDefintion>.Create;
-  FRegisteredOptions  := TList<IOptionDefintion>.Create;
+  FOptionsLookup      := TDictionary<string,IOptionDefinition>.Create;
+  FUnnamedOptions     := TList<IOptionDefinition>.Create;
+  FRegisteredOptions  := TList<IOptionDefinition>.Create;
 end;
 
 destructor TCommandDefImpl.Destroy;
@@ -98,17 +98,17 @@ begin
   inherited;
 end;
 
-procedure TCommandDefImpl.EmumerateCommandOptions(const proc: TConstProc<IOptionDefintion>);
+procedure TCommandDefImpl.EmumerateCommandOptions(const proc: TConstProc<IOptionDefinition>);
 var
-  optionList : TList<IOptionDefintion>;
-  opt : IOptionDefintion;
+  optionList : TList<IOptionDefinition>;
+  opt : IOptionDefinition;
 begin
-  optionList := TList<IOptionDefintion>.Create;
+  optionList := TList<IOptionDefinition>.Create;
   try
     optionList.AddRange(FRegisteredOptions);
 
-    optionList.Sort(TComparer<IOptionDefintion>.Construct(
-      function (const L, R: IOptionDefintion): integer
+    optionList.Sort(TComparer<IOptionDefinition>.Construct(
+      function (const L, R: IOptionDefinition): integer
       begin
         Result := CompareText(L.LongName,R.LongName);
       end));
@@ -122,15 +122,15 @@ end;
 
 procedure TCommandDefImpl.EmumerateCommandOptions(const proc: TConstProc<string, string, string>);
 var
-  optionList : TList<IOptionDefintion>;
-  opt : IOptionDefintion;
+  optionList : TList<IOptionDefinition>;
+  opt : IOptionDefinition;
 begin
-  optionList := TList<IOptionDefintion>.Create;
+  optionList := TList<IOptionDefinition>.Create;
   try
     optionList.AddRange(FRegisteredOptions);
 
-    optionList.Sort(TComparer<IOptionDefintion>.Construct(
-      function (const L, R: IOptionDefintion): integer
+    optionList.Sort(TComparer<IOptionDefinition>.Construct(
+      function (const L, R: IOptionDefinition): integer
       begin
         Result := CompareText(L.LongName,R.LongName);
       end));
@@ -148,7 +148,7 @@ begin
   result := FAlias;
 end;
 
-procedure TCommandDefImpl.GetAllRegisteredOptions(const list: TList<IOptionDefintion>);
+procedure TCommandDefImpl.GetAllRegisteredOptions(const list: TList<IOptionDefinition>);
 begin
   list.AddRange(FUnnamedOptions);
   list.AddRange(FRegisteredOptions);
@@ -174,12 +174,12 @@ begin
   result := FName;
 end;
 
-function TCommandDefImpl.GetRegisteredOptions: TList<IOptionDefintion>;
+function TCommandDefImpl.GetRegisteredOptions: TList<IOptionDefinition>;
 begin
   result := FRegisteredOptions;
 end;
 
-function TCommandDefImpl.GetUnNamedOptions: TList<IOptionDefintion>;
+function TCommandDefImpl.GetUnNamedOptions: TList<IOptionDefinition>;
 begin
   result := FUnNamedOptions;
 end;
@@ -199,7 +199,7 @@ begin
   result := FOptionsLookup.ContainsKey(LowerCase(name));
 end;
 
-function TCommandDefImpl.TryGetOption(const name: string; var option: IOptionDefintion): boolean;
+function TCommandDefImpl.TryGetOption(const name: string; var option: IOptionDefinition): boolean;
 begin
   result := FOptionsLookup.TryGetValue(LowerCase(name),option);
 end;
