@@ -103,7 +103,7 @@ type
 implementation
 
 uses
-  System.Classes,
+  Classes,
   VSoft.CommandLine.OptionDef;
 
 { TCommandLineParserTests }
@@ -130,7 +130,7 @@ begin
     sList.Free;
   end;
   Assert.IsFalse(parseResult.HasErrors);
-  Assert.AreEqual<TExampleEnum>(enTwo,test);
+  Assert.AreEqual(Ord(enTwo), Ord(test));
 end;
 
 procedure TCommandLineParserTests.Can_Parse_Multiple_Unnamed_Parameters;
@@ -229,7 +229,7 @@ begin
     sList.Free;
   end;
   Assert.IsFalse(parseResult.HasErrors);
-  Assert.AreEqual<TExampleSet>(test,[enOne,enThree]);
+  Assert.IsTrue(test = [enOne,enThree]);
 end;
 
 procedure TCommandLineParserTests.Can_Parse_EqualNameValueSeparator;

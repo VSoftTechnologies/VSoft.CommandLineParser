@@ -195,7 +195,7 @@ implementation
 
 uses
   Generics.Defaults,
-  System.StrUtils,
+  StrUtils,
   VSoft.CommandLine.Utils,
   VSoft.CommandLine.Parser,
   VSoft.Commandline.OptionDef,
@@ -222,7 +222,7 @@ var
 begin
   cmdDef := TCommandDefImpl.Create(name,alias, usage, description, helpString,visible);
   result := TCommandDefinition.Create(cmdDef);
-  FCommandDefs.Add(name.ToLower,cmdDef);
+  FCommandDefs.Add(AnsiLowerCase(name),cmdDef);
 end;
 
 
@@ -252,7 +252,7 @@ end;
 class function TOptionsRegistry.GetCommandByName(const name: string): ICommandDefinition;
 begin
   result := nil;
-  FCommandDefs.TryGetValue(name.ToLower,Result);
+  FCommandDefs.TryGetValue(AnsiLowerCase(name),Result);
 
 end;
 
@@ -309,6 +309,15 @@ begin
   end;
 end;
 
+function PadRight(const s: string; TotalWidth: Integer; PaddingChar: Char = ' '): string;
+begin
+  TotalWidth := TotalWidth - Length(s);
+  if TotalWidth > 0 then
+    Result := s + StringOfChar(PaddingChar, TotalWidth)
+  else
+    Result := s;
+end;
+
 class procedure TOptionsRegistry.PrintUsage(const command: ICommandDefinition; const proc: TConstProc<string>);
 var
   maxDescW : integer;
@@ -358,7 +367,7 @@ begin
       if al <> 0 then
         Inc(al,5); //add brackets and 2 spaces;
 
-      s := ' -' + opt.LongName.PadRight(descriptionTab -1 - al);
+      s := ' -' + PadRight(opt.LongName, descriptionTab -1 - al);
       if al > 0 then
         s := s + '(-' + opt.ShortName + ')' + '  ';
       s := s + descStrings[0];
@@ -368,7 +377,7 @@ begin
       if numDescStrings > 1 then
       begin
         for i := 1 to numDescStrings -1 do
-          proc(''.PadRight(descriptionTab +1) + descStrings[i]);
+          proc(PadRight('', descriptionTab +1) + descStrings[i]);
       end;
 
     end);
@@ -415,12 +424,12 @@ begin
       if cmd.Visible then
       begin
         descStrings := SplitDescription(cmd.Description,maxDescW);
-        proc(' ' + cmd.Name.PadRight(descriptionTab -1) + descStrings[0]);
+        proc(' ' + PadRight(cmd.Name, descriptionTab -1) + descStrings[0]);
         numDescStrings := Length(descStrings);
         if numDescStrings > 1 then
         begin
           for i := 1 to numDescStrings -1 do
-            proc(''.PadRight(descriptionTab) + descStrings[i]);
+            proc(PadRight('', descriptionTab) + descStrings[i]);
         end;
         proc('');
       end;
