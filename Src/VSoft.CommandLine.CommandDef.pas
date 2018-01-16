@@ -50,7 +50,7 @@ implementation
 
 uses
   Generics.Defaults,
-  System.SysUtils;
+  SysUtils;
 
 { TCommandDef }
 

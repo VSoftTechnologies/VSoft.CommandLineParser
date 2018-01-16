@@ -10,9 +10,11 @@ function GetConsoleWidth : integer;
 implementation
 
 uses
-  System.SysUtils,
-  System.StrUtils,
-  WinAPI.Windows;
+{$IFDEF MSWINDOWS}
+  Windows,
+{$ENDIF}
+  SysUtils,
+  StrUtils;
 
 function SplitStringAt(const len : integer; const value : string) : TArray<string>;
 var
@@ -40,6 +42,41 @@ begin
   end;
 end;
 
+{$IFDEF VER210}
+type
+  TStringDynArray = array of string;
+
+function SplitString(const s, delimiters: string): TStringDynArray;
+var
+  splitCount: Integer;
+  startIndex: Integer;
+  foundIndex: Integer;
+  i: Integer;
+begin
+  Result := nil;
+
+  if s <> '' then
+  begin
+    splitCount := 0;
+    for i := 1 to Length(s) do
+      if IsDelimiter(delimiters, s, i) then
+        Inc(splitCount);
+
+    SetLength(Result, splitCount + 1);
+
+    startIndex := 1;
+    for i := 0 to splitCount - 1 do
+    begin
+      foundIndex := FindDelimiter(delimiters, s, startIndex);
+      Result[i] := Copy(s, startIndex, foundIndex - startIndex);
+      startIndex := foundIndex + 1;
+    end;
+
+    Result[splitCount] := Copy(s, startIndex, Length(s) - startIndex + 1);
+  end;
+end;
+{$ENDIF}
+
 function SplitDescription(const value : string; const maxLen : integer) : TArray<string>;
 var
   descStrings : TArray<string>;
@@ -64,7 +101,7 @@ begin
     SetLength(result,k);
     for s in descStrings do
     begin
-      result[j] := s.Trim;
+      result[j] := Trim(s);
       Inc(j);
     end;
   end;

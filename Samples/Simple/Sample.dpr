@@ -31,7 +31,7 @@ program Sample;
 {$R *.res}
 
 uses
-  System.SysUtils,
+  SysUtils,
   VSoft.CommandLine.OptionDef in '..\..\Src\VSoft.CommandLine.OptionDef.pas',
   VSoft.CommandLine.Options in '..\..\Src\VSoft.CommandLine.Options.pas',
   VSoft.CommandLine.Parser in '..\..\Src\VSoft.CommandLine.Parser.pas',
