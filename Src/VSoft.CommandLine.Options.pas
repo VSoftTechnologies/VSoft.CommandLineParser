@@ -195,7 +195,7 @@ implementation
 
 uses
   Generics.Defaults,
-  StrUtils,
+  System.StrUtils,
   VSoft.CommandLine.Utils,
   VSoft.CommandLine.Parser,
   VSoft.Commandline.OptionDef,
@@ -222,7 +222,7 @@ var
 begin
   cmdDef := TCommandDefImpl.Create(name,alias, usage, description, helpString,visible);
   result := TCommandDefinition.Create(cmdDef);
-  FCommandDefs.Add(AnsiLowerCase(name),cmdDef);
+  FCommandDefs.Add(name.ToLower,cmdDef);
 end;
 
 
@@ -252,7 +252,7 @@ end;
 class function TOptionsRegistry.GetCommandByName(const name: string): ICommandDefinition;
 begin
   result := nil;
-  FCommandDefs.TryGetValue(AnsiLowerCase(name),Result);
+  FCommandDefs.TryGetValue(name.ToLower,Result);
 
 end;
 
@@ -273,7 +273,7 @@ class procedure TOptionsRegistry.EmumerateCommandOptions(const commandName: stri
 var
   cmd : ICommandDefinition;
 begin
-  if not FCommandDefs.TryGetValue(commandName,cmd) then
+  if not FCommandDefs.TryGetValue(commandName.ToLower,cmd) then
     raise Exception.Create('Unknown command : ' + commandName);
 
   cmd.EmumerateCommandOptions(proc);
@@ -362,17 +362,17 @@ begin
        al : integer;
        s  : string;
     begin
-      descStrings := SplitDescription(opt.HelpText,maxDescW);
+      s := WrapText(opt.HelpText, maxDescW);
+      descStrings := s.Split([sLineBreak], TStringSplitOptions.None);
       al := Length(opt.ShortName);
       if al <> 0 then
-        Inc(al,5); //add brackets and 2 spaces;
+        Inc(al,5); //add backets and 2 spaces;
 
-      s := ' -' + PadRight(opt.LongName, descriptionTab -1 - al);
+      s := ' -' + PadRight(opt.LongName, descriptionTab -2 - al);
       if al > 0 then
         s := s + '(-' + opt.ShortName + ')' + '  ';
       s := s + descStrings[0];
       proc(s);
-  //          FConsole.WriteLine(' -' + name.PadRight(descriptionTab -1) + descStrings[0]);
       numDescStrings := Length(descStrings);
       if numDescStrings > 1 then
       begin
@@ -402,6 +402,11 @@ begin
   PrintUsage(cmd,proc);
 end;
 
+function compareKey(const L, R: String): Integer;
+begin
+  Result := SysUtils.CompareText(L, R);
+end;
+
 class procedure TOptionsRegistry.PrintUsage(const proc: TConstProc<string>);
 var
   cmd : ICommandDefinition;
@@ -409,6 +414,10 @@ var
   i : integer;
   numDescStrings : integer;
   maxDescW : integer;
+  s : string;
+  keyArray: TArray<String>;
+  key : string;
+
 begin
   proc('');
   if FCommandDefs.Count > 0 then
@@ -417,13 +426,19 @@ begin
       maxDescW := FConsoleWidth
     else
       maxDescW := High(Integer);
-     maxDescW := maxDescW - FDescriptionTab;
+     maxDescW := maxDescW - FDescriptionTab - 2;
 
-    for cmd in FCommandDefs.Values do
+    keyArray:= FCommandDefs.Keys.ToArray;
+    TArray.Sort<String>(keyArray, TComparer<String>.Construct(compareKey));
+
+    for key in keyArray do
     begin
+      cmd := FCommandDefs[key];
+
       if cmd.Visible then
       begin
-        descStrings := SplitDescription(cmd.Description,maxDescW);
+        s := WrapText(cmd.Description,maxDescW);
+        descStrings := s.Split([sLineBreak], TStringSplitOptions.None);
         proc(' ' + PadRight(cmd.Name, descriptionTab -1) + descStrings[0]);
         numDescStrings := Length(descStrings);
         if numDescStrings > 1 then
