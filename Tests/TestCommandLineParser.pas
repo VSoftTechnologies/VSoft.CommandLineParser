@@ -98,12 +98,19 @@ type
   [Test]
   procedure Can_Parse_ColonEqualNameValueSeparator;
 
+  [Test]
+  procedure Will_Not_Print_GlobalOptions_Without_GlobalOptions;
+
+  [Test]
+  procedure Will_Print_GlobalOptions_With_GlobalOptions;
+
   end;
 
 implementation
 
 uses
   Classes,
+  StrUtils,
   VSoft.CommandLine.OptionDef;
 
 { TCommandLineParserTests }
@@ -320,12 +327,12 @@ end;
 
 procedure TCommandLineParserTests.Setup;
 begin
-  TOptionsRegistry.DefaultCommand.Clear;
+  TOptionsRegistry.Clear;
 end;
 
 procedure TCommandLineParserTests.TearDown;
 begin
-  TOptionsRegistry.DefaultCommand.Clear;
+  TOptionsRegistry.Clear;
 end;
 
 procedure TCommandLineParserTests.Test_Single_Option;
@@ -556,6 +563,40 @@ begin
   end;
   Assert.IsTrue(parseResult.HasErrors);
 
+end;
+
+procedure TCommandLineParserTests.Will_Not_Print_GlobalOptions_Without_GlobalOptions;
+var
+  Usage: string;
+begin
+  TOptionsRegistry.RegisterCommand('command1', '', 'description for command 1', '', '');
+  TOptionsRegistry.RegisterCommand('command2', '', 'description for command 2', '', '');
+  TOptionsRegistry.PrintUsage(
+    procedure(const Value: string)
+    begin
+      Usage := Usage + Value + #13;
+    end);
+  Assert.IsFalse(ContainsText(Usage, 'global options'));
+end;
+
+procedure TCommandLineParserTests.Will_Print_GlobalOptions_With_GlobalOptions;
+var
+  Usage: string;
+  Test: string;
+begin
+  TOptionsRegistry.RegisterOption<string>('test', 't', 'helpText',
+    procedure(const Value: string)
+    begin
+      Test := Value;
+    end);
+  TOptionsRegistry.RegisterCommand('command1', '', 'description for command 1', '', '');
+  TOptionsRegistry.RegisterCommand('command2', '', 'description for command 2', '', '');
+  TOptionsRegistry.PrintUsage(
+    procedure(const Line: string)
+    begin
+      Usage := Usage + Line + #13;
+    end);
+  Assert.IsTrue(ContainsText(Usage, 'global options'));
 end;
 
 initialization

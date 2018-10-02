@@ -24,6 +24,7 @@ type
   protected
     procedure AddOption(const value: IOptionDefinition);
     function HasOption(const name : string) : boolean;
+    function HasOptions : boolean;
     function GetRegisteredOptions : TList<IOptionDefinition>;
     function GetUnNamedOptions  : TList<IOptionDefinition>;
     function GetName : string;
@@ -197,6 +198,11 @@ end;
 function TCommandDefImpl.HasOption(const name: string): boolean;
 begin
   result := FOptionsLookup.ContainsKey(LowerCase(name));
+end;
+
+function TCommandDefImpl.HasOptions: boolean;
+begin
+  result := (FOptionsLookup.Count > 0);
 end;
 
 function TCommandDefImpl.TryGetOption(const name: string; var option: IOptionDefinition): boolean;

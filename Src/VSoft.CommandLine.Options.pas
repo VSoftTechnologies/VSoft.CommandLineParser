@@ -107,6 +107,7 @@ type
     procedure AddOption(const value : IOptionDefinition);
     function TryGetOption(const name : string; var option : IOptionDefinition) : boolean;
     function HasOption(const name : string) : boolean;
+    function HasOptions : boolean;
     procedure Clear;
     procedure EmumerateCommandOptions(const proc : TConstProc<string,string, string>);overload;
     procedure EmumerateCommandOptions(const proc : TConstProc<IOptionDefinition>);overload;
@@ -332,55 +333,53 @@ begin
       proc('');
       proc('   ' + command.HelpText);
     end;
-    proc('');
-    proc('options :');
-    proc('');
-  end
-  else
+  end;
+
+  if command.HasOptions then
   begin
     proc('');
-    if FCommandDefs.Count > 0 then
+    if command.IsDefault then
       proc('global options :')
     else
       proc('options :');
     proc('');
-  end;
 
-  if FConsoleWidth < High(Integer) then
-    maxDescW := FConsoleWidth
-  else
-    maxDescW := High(Integer);
+    if FConsoleWidth < High(Integer) then
+      maxDescW := FConsoleWidth
+    else
+      maxDescW := High(Integer);
 
-  maxDescW := maxDescW - FDescriptionTab;
+    maxDescW := maxDescW - FDescriptionTab;
 
-  command.EmumerateCommandOptions(
-    procedure(const opt : IOptionDefinition)
-    var
-       descStrings : TArray<string>;
-       i : integer;
-       numDescStrings : integer;
-       al : integer;
-       s  : string;
-    begin
-      s := WrapText(opt.HelpText, maxDescW);
-      descStrings := s.Split([sLineBreak], TStringSplitOptions.None);
-      al := Length(opt.ShortName);
-      if al <> 0 then
-        Inc(al,5); //add backets and 2 spaces;
-
-      s := ' -' + PadRight(opt.LongName, descriptionTab -2 - al);
-      if al > 0 then
-        s := s + '(-' + opt.ShortName + ')' + '  ';
-      s := s + descStrings[0];
-      proc(s);
-      numDescStrings := Length(descStrings);
-      if numDescStrings > 1 then
+    command.EmumerateCommandOptions(
+      procedure(const opt : IOptionDefinition)
+      var
+         descStrings : TArray<string>;
+         i : integer;
+         numDescStrings : integer;
+         al : integer;
+         s  : string;
       begin
-        for i := 1 to numDescStrings -1 do
-          proc(PadRight('', descriptionTab +1) + descStrings[i]);
-      end;
+        s := WrapText(opt.HelpText, maxDescW);
+        descStrings := s.Split([sLineBreak], TStringSplitOptions.None);
+        al := Length(opt.ShortName);
+        if al <> 0 then
+          Inc(al,5); //add backets and 2 spaces;
 
-    end);
+        s := ' -' + PadRight(opt.LongName, descriptionTab -2 - al);
+        if al > 0 then
+          s := s + '(-' + opt.ShortName + ')' + '  ';
+        s := s + descStrings[0];
+        proc(s);
+        numDescStrings := Length(descStrings);
+        if numDescStrings > 1 then
+        begin
+          for i := 1 to numDescStrings -1 do
+            proc(PadRight('', descriptionTab +1) + descStrings[i]);
+        end;
+
+      end);
+  end;
 
 end;
 
@@ -449,10 +448,8 @@ begin
         proc('');
       end;
     end;
-    PrintUsage(FDefaultCommand.FCommandDef,proc);
-  end
-  else
-    PrintUsage(FDefaultCommand.FCommandDef,proc);
+  end;
+  PrintUsage(FDefaultCommand.FCommandDef,proc);
 end;
 
 class function TOptionsRegistry.RegisterOption<T>(const longName, shortName, helpText: string; const Action: TConstProc<T>): IOptionDefinition;
