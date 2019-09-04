@@ -136,10 +136,9 @@ begin
   defaultCommand := TOptionsRegistry.DefaultCommand;
   currentCommand := defaultCommand;
 
-
+  i := 0;
   while i < values.Count do
   begin
-    j := 0;
     option := nil;
     bTryValue := true;
     bUseKey := false;
