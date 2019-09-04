@@ -136,6 +136,7 @@ type
     function RegisterOption<T>(const longName: string; const shortName : string; const Action : TConstProc<T>) : IOptionDefinition;overload;
     function RegisterOption<T>(const longName: string; const shortName : string; const helpText : string; const Action : TConstProc<T>) : IOptionDefinition;overload;
     function RegisterUnNamedOption<T>(const helpText : string; const Action : TConstProc<T>) : IOptionDefinition;overload;
+    function RegisterUnNamedOption<T>(const helpText : string; const valueDescription : string; const Action : TConstProc<T>) : IOptionDefinition;overload;
     function HasOption(const value : string) : boolean;
     constructor Create(const commandDef : ICommandDefinition);
     property Name : string read GetName;
@@ -166,13 +167,14 @@ type
     class function RegisterOption<T>(const longName: string; const shortName : string; const Action : TConstProc<T>) : IOptionDefinition;overload;
     class function RegisterOption<T>(const longName: string; const shortName : string; const helpText : string; const Action : TConstProc<T>) : IOptionDefinition;overload;
     class function RegisterUnNamedOption<T>(const helpText : string; const Action : TConstProc<T>) : IOptionDefinition;overload;
+    class function RegisterUnNamedOption<T>(const helpText : string; const valueDescription : string; const Action : TConstProc<T>) : IOptionDefinition;overload;
 
     class function RegisterCommand(const name : string; const alias : string; const description : string; const helpString : string; const usage : string; const visible : boolean = true) : TCommandDefinition;
 
     class function Parse: ICommandLineParseResult;overload;
     class function Parse(const values : TStrings) : ICommandLineParseResult;overload;
 
-    class procedure PrintUsage(const proc : TConstProc<string>);overload;
+    class procedure PrintUsage(const proc : TConstProc<string>; const printDefaultUsage : boolean = true);overload;
     class procedure PrintUsage(const commandName : string; const proc : TConstProc<string>);overload;
     class procedure PrintUsage(const command : ICommandDefinition; const proc : TConstProc<string>);overload;
 
@@ -240,7 +242,7 @@ begin
   FDefaultCommand := TCommandDefinition.Create(cmdDef);
   FCommandDefs := TDictionary<string,ICommandDefinition>.Create;
   FNameValueSeparator := ':';
-  FDescriptionTab := 15;
+  FDescriptionTab := 35;
   FConsoleWidth := GetConsoleWidth;
 end;
 
@@ -294,7 +296,7 @@ begin
       if cmd.Visible then
         cmdList.Add(cmd);
     end;
-    
+
     cmdList.Sort(TComparer<ICommandDefinition>.Construct(
     function (const L, R: ICommandDefinition): integer
     begin
@@ -318,13 +320,22 @@ begin
     Result := s;
 end;
 
+function PadLeft(const s: string; TotalWidth: Integer; PaddingChar: Char = ' '): string;
+begin
+   Result := StringOfChar(PaddingChar, TotalWidth) + s
+end;
+
+
 class procedure TOptionsRegistry.PrintUsage(const command: ICommandDefinition; const proc: TConstProc<string>);
 var
   maxDescW : integer;
+  exeName : string;
 begin
+  exeName := ChangeFileExt(ExtractFileName(ParamStr(0)), '').ToLower();
   if not command.IsDefault then
   begin
-    proc('usage: ' + command.Usage);
+    proc('');
+    proc('Usage: ' + exeName + ' ' + command.Usage);
     proc('');
     proc(command.Description);
     if command.HelpText <> '' then
@@ -333,17 +344,12 @@ begin
       proc('   ' + command.HelpText);
     end;
     proc('');
-    proc('options :');
-    proc('');
+    proc('Options:');
   end
   else
   begin
     proc('');
-    if FCommandDefs.Count > 0 then
-      proc('global options :')
-    else
-      proc('options :');
-    proc('');
+    proc('Options:');
   end;
 
   if FConsoleWidth < High(Integer) then
@@ -359,25 +365,37 @@ begin
        descStrings : TArray<string>;
        i : integer;
        numDescStrings : integer;
-       al : integer;
        s  : string;
     begin
-      s := WrapText(opt.HelpText, maxDescW);
-      descStrings := s.Split([sLineBreak], TStringSplitOptions.None);
-      al := Length(opt.ShortName);
-      if al <> 0 then
-        Inc(al,5); //add backets and 2 spaces;
+      s := WrapText(opt.HelpText, sLineBreak, [' ', '-', #9, ','],  maxDescW -1);
 
-      s := ' -' + PadRight(opt.LongName, descriptionTab -2 - al);
-      if al > 0 then
-        s := s + '(-' + opt.ShortName + ')' + '  ';
+      descStrings := s.Split([sLineBreak], TStringSplitOptions.None);
+      for i := 0 to length(descStrings) -1 do
+        descStrings[i] := Trim(descStrings[i]);
+
+      if opt.IsUnnamed then
+        s := ' <' + opt.ShortName + '>'
+      else
+      begin
+        s := ' -' + opt.LongName;
+        if opt.ShortName <> '' then
+          s := s + '|-' + opt.ShortName ;
+      end;
+
+      if opt.HasValue then
+        s := s + FNameValueSeparator + '<' + opt.LongName + '>';
+      s := PadRight(s, FDescriptionTab);
       s := s + descStrings[0];
       proc(s);
       numDescStrings := Length(descStrings);
       if numDescStrings > 1 then
       begin
         for i := 1 to numDescStrings -1 do
-          proc(PadRight('', descriptionTab +1) + descStrings[i]);
+        begin
+          s := PadLeft(descStrings[i], FDescriptionTab);
+          proc(s);
+        end;
+        proc('');
       end;
 
     end);
@@ -407,7 +425,7 @@ begin
   Result := SysUtils.CompareText(L, R);
 end;
 
-class procedure TOptionsRegistry.PrintUsage(const proc: TConstProc<string>);
+class procedure TOptionsRegistry.PrintUsage(const proc: TConstProc<string>; const printDefaultUsage : boolean);
 var
   cmd : ICommandDefinition;
   descStrings : TArray<string>;
@@ -417,11 +435,19 @@ var
   s : string;
   keyArray: TArray<String>;
   key : string;
-
+  exeName : string;
 begin
   proc('');
+  exeName := ChangeFileExt(ExtractFileName(ParamStr(0)), '').ToLower();
+
+  //if we have more than 1 command then we are using command mode
   if FCommandDefs.Count > 0 then
   begin
+    proc('Usage : ' + exeName + ' [command] [options]');
+    proc('');
+    proc('Commands :');
+
+
     if FConsoleWidth < High(Integer) then
       maxDescW := FConsoleWidth
     else
@@ -434,31 +460,41 @@ begin
     for key in keyArray do
     begin
       cmd := FCommandDefs[key];
+      if not cmd.Visible then
+        continue;
 
-      if cmd.Visible then
+      s := WrapText(cmd.Description,maxDescW);
+      descStrings := s.Split([sLineBreak], TStringSplitOptions.None);
+      proc(' ' + PadRight(cmd.Name, descriptionTab -1) + descStrings[0]);
+      numDescStrings := Length(descStrings);
+      if numDescStrings > 1 then
       begin
-        s := WrapText(cmd.Description,maxDescW);
-        descStrings := s.Split([sLineBreak], TStringSplitOptions.None);
-        proc(' ' + PadRight(cmd.Name, descriptionTab -1) + descStrings[0]);
-        numDescStrings := Length(descStrings);
-        if numDescStrings > 1 then
-        begin
-          for i := 1 to numDescStrings -1 do
-            proc(PadRight('', descriptionTab) + descStrings[i]);
-        end;
-        proc('');
+        for i := 1 to numDescStrings -1 do
+          proc(PadRight('', descriptionTab) + descStrings[i]);
       end;
     end;
     PrintUsage(FDefaultCommand.FCommandDef,proc);
   end
-  else
+  else //non command mode
+  begin
+    if printDefaultUsage then
+    begin
+      proc('');
+      proc('Usage : ' + exeName + ' [options]');
+    end;
     PrintUsage(FDefaultCommand.FCommandDef,proc);
+  end;
 end;
 
 class function TOptionsRegistry.RegisterOption<T>(const longName, shortName, helpText: string; const Action: TConstProc<T>): IOptionDefinition;
 begin
   result := RegisterOption<T>(longName,shortName,Action);
   result.HelpText := helpText;
+end;
+
+class function TOptionsRegistry.RegisterUnNamedOption<T>(const helpText, valueDescription: string; const Action: TConstProc<T>): IOptionDefinition;
+begin
+  result := FDefaultCommand.RegisterUnNamedOption<T>(helpText,valueDescription, Action);
 end;
 
 class function TOptionsRegistry.RegisterOption<T>(const longName: string; const Action: TConstProc<T>): IOptionDefinition;
@@ -531,6 +567,14 @@ begin
   result.HelpText := helpText;
 end;
 
+function TCommandDefinition.RegisterUnNamedOption<T>(const helpText, valueDescription: string; const Action: TConstProc<T>): IOptionDefinition;
+begin
+  result := TOptionDefinition<T>.Create('',valueDescription,helptext,Action);
+  result.HasValue := false;
+  FCommandDef.AddOption(result);
+
+end;
+
 function TCommandDefinition.RegisterUnNamedOption<T>(const helpText: string; const Action: TConstProc<T>): IOptionDefinition;
 begin
   result := TOptionDefinition<T>.Create('','',helptext,Action);
@@ -575,9 +619,5 @@ begin
     cmdList.Free;
   end;
 end;
-
-initialization
-
-
 
 end.

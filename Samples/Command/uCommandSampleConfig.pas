@@ -22,14 +22,14 @@ begin
   option.HasValue := false;
 
 
-  cmd := TOptionsRegistry.RegisterCommand('help','h','get some help','','commandsample help [command]');
-  option := cmd.RegisterUnNamedOption<string>('The command you need help for',
+  cmd := TOptionsRegistry.RegisterCommand('help','h','get some help','','help [command]');
+  option := cmd.RegisterUnNamedOption<string>('The command you need help for, a long description so that it probably wraps on the console', 'command',
                   procedure(const value : string)
                   begin
                       THelpOptions.HelpCommand := value;
                   end);
 
-  cmd := TOptionsRegistry.RegisterCommand('install','','install something', '', 'commandsample install [options]');
+  cmd := TOptionsRegistry.RegisterCommand('install','','install something', '', 'install [options]');
   option := cmd.RegisterOption<string>('installpath','i','The path to the exe to install',
                   procedure(const value : string)
                   begin

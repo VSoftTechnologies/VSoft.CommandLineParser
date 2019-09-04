@@ -105,6 +105,7 @@ var
 begin
   optionList := TList<IOptionDefinition>.Create;
   try
+    optionList.AddRange(FUnnamedOptions);
     optionList.AddRange(FRegisteredOptions);
 
     optionList.Sort(TComparer<IOptionDefinition>.Construct(
@@ -127,6 +128,7 @@ var
 begin
   optionList := TList<IOptionDefinition>.Create;
   try
+    optionList.AddRange(FUnnamedOptions);
     optionList.AddRange(FRegisteredOptions);
 
     optionList.Sort(TComparer<IOptionDefinition>.Construct(

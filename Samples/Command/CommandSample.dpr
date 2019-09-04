@@ -20,41 +20,43 @@ Note : The Options are registered in uSampleOptions
 
 var
   parseresult :  ICommandLineParseResult;
+
+
+
+procedure PrintUsage(const command : string);
+begin
+  if command = 'help' then
+  begin
+    if THelpOptions.HelpCommand = '' then
+      THelpOptions.HelpCommand := 'help';
+  end
+  else
+    THelpOptions.HelpCommand := command;
+  TOptionsRegistry.PrintUsage(THelpOptions.HelpCommand,
+    procedure (const value : string)
+    begin
+      WriteLn(value);
+    end);
+end;
+
 begin
   try
     //parse the command line options
+    TOptionsRegistry.DescriptionTab := 35;
     parseresult := TOptionsRegistry.Parse;
     if parseresult.HasErrors then
     begin
-      Writeln('Invalid options :');
       Writeln;
       Writeln(parseresult.ErrorText);
-      Writeln;
-      Writeln('Usage : commandsample [command] [options]');
-      TOptionsRegistry.PrintUsage(
-        procedure(const value : string)
-        begin
-          Writeln(value);
-        end);
+      PrintUsage(parseresult.Command);
     end
     else
     begin
-      if parseresult.Command = '' then
-      begin
-        Writeln;
-        Writeln('Usage : commandsample [command] [options]');
-        TOptionsRegistry.PrintUsage(
-          procedure (const value : string)
-          begin
-            WriteLn(value);
-          end);
-      end
+      if (parseresult.Command = '') or (parseresult.Command = 'help') then
+        PrintUsage(parseresult.Command)
       else
-      begin
-        WriteLn('Command : ' + parseresult.Command);
-        Writeln('Install Path : ' + TInstallOptions.InstallPath );
-        Writeln('Help Command : ' + THelpOptions.HelpCommand );
-      end;
+        //run your command handler here!
+        writeLn('Will execute command : ' + parseResult.Command + '');
     end;
     ReadLn;
   except
