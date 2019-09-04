@@ -48,6 +48,7 @@ var
 begin
   try
     //parse the command line options
+//    TOptionsRegistry.NameValueSeparator := ':';
     parseresult := TOptionsRegistry.Parse;
     if parseresult.HasErrors then
     begin

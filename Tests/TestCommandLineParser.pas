@@ -98,6 +98,10 @@ type
   [Test]
   procedure Can_Parse_ColonEqualNameValueSeparator;
 
+  [Test]
+  procedure Can_Parse_SpaceNameValueSeparator;
+
+
   end;
 
 implementation
@@ -230,6 +234,43 @@ begin
   end;
   Assert.IsFalse(parseResult.HasErrors);
   Assert.IsTrue(test = [enOne,enThree]);
+end;
+
+procedure TCommandLineParserTests.Can_Parse_SpaceNameValueSeparator;
+var
+  def : IOptionDefinition;
+  test : string;
+  another : string;
+  parseResult : ICommandLineParseResult;
+  sList : TStringList;
+begin
+  def := TOptionsRegistry.RegisterOption<string>('test','t',
+                  procedure(const value : string)
+                  begin
+                    test := value;
+                  end);
+
+  def := TOptionsRegistry.RegisterOption<string>('another','a',
+                  procedure(const value : string)
+                  begin
+                    another:= value;
+                  end);
+
+
+  sList := TStringList.Create;
+  sList.Add('--test');
+  sList.Add('hello');
+  sList.Add('-a');
+  sList.Add('gotit');
+  try
+    TOptionsRegistry.NameValueSeparator := ' ';
+    parseResult := TOptionsRegistry.Parse(sList);
+  finally
+    sList.Free;
+  end;
+  Assert.AreEqual('hello',test);
+  Assert.AreEqual('gotit',another);
+
 end;
 
 procedure TCommandLineParserTests.Can_Parse_EqualNameValueSeparator;

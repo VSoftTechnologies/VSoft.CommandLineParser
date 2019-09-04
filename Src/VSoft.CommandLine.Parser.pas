@@ -117,6 +117,7 @@ procedure TCommandLineParser.InternalParse(const values: TStrings; const parseRe
 var
   i : integer;
   j : integer;
+  lookAhead : integer;
   value : string;
   key : string;
   option : IOptionDefinition;
@@ -126,11 +127,17 @@ var
   bTryValue : boolean;
   bUseKey : boolean;
 
+  function IsOption(const value : string) : boolean;
+  begin
+    result := StartsStr('-',value) or StartsStr('/',value) or StartsStr('@',value);
+  end;
+
 begin
   defaultCommand := TOptionsRegistry.DefaultCommand;
   currentCommand := defaultCommand;
 
-  for i := 0 to values.Count -1 do
+
+  while i < values.Count do
   begin
     j := 0;
     option := nil;
@@ -155,6 +162,7 @@ begin
       //switching commands
       parseResult.SetCommand(currentCommand);
       FUnamedIndex := 0;
+      Inc(i);
       continue;
     end
     else if FUnamedIndex < currentCommand.RegisteredUnamedOptions.Count  then
@@ -168,19 +176,49 @@ begin
     begin
       //don't recognise the start so report it and continue.
       parseResult.AddError('Unknown option : ' + values.Strings[i]);
+      Inc(i);
       continue;
     end;
 
     if bTryValue then
-      j := Pos(FNameValueSeparator,value);
-    if j > 0 then
     begin
-      //separate out into key and value
-      key := Copy(value,1,j-1);
-      Delete(value,1,j + Length(FNameValueSeparator) - 1);
-      //it should already come in here without quotes when parsing paramstr(x).
-      //but it might have quotes if it came in from a parameter file;
-      StripQuotes(value);
+      //with a space as the separator things are a bit more complicated.
+      //we need to look ahead to the next string.
+      if FNameValueSeparator = ' ' then
+      begin
+        lookAhead := i + 1;
+        if lookAhead < values.Count then
+        begin
+          key := value;
+          value := values.Strings[lookAhead];
+          if IsOption(value) then
+            value := ''
+          else
+            Inc(i);
+        end;
+      end
+      else
+      begin
+        j := Pos(FNameValueSeparator,value);
+        if j > 0 then
+        begin
+          //separate out into key and value
+          key := Copy(value,1,j-1);
+          Delete(value,1,j + Length(FNameValueSeparator) - 1);
+          //it should already come in here without quotes when parsing paramstr(x).
+          //but it might have quotes if it came in from a parameter file;
+          StripQuotes(value);
+        end
+        else
+        begin
+          //no value just a key
+          key := value;
+          value := '';
+        end;
+
+      end;
+
+
     end
     else
     begin
@@ -207,6 +245,7 @@ begin
       if option.HasValue and (value = '') then
       begin
         parseResult.AddError('Option [' + key +'] expected a following ' +FNameValueSeparator+'<value> but none was found');
+        Inc(i);
         continue;
       end;
       if option.IsOptionFile then
@@ -218,6 +257,7 @@ begin
         if not FileExists(value) then
         begin
           parseResult.AddError('Parameter File [' + value +'] does not exist');
+          Inc(i);
           continue;
         end;
         try
@@ -247,8 +287,11 @@ begin
     else
     begin
       parseResult.AddError('Unknown command line option : ' + values.Strings[i]);
+      Inc(i);
       continue;
     end;
+
+    Inc(i);
   end;
 end;
 
