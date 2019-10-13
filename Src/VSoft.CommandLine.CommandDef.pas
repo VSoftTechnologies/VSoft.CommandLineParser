@@ -21,6 +21,7 @@ type
     FUnnamedOptions     : TList<IOptionDefinition>;
     //all registered options.
     FRegisteredOptions  : TList<IOptionDefinition>;
+    FExamples : TList<string>;
   protected
     procedure AddOption(const value: IOptionDefinition);
     function HasOption(const name : string) : boolean;
@@ -33,7 +34,7 @@ type
     function GetIsDefault : boolean;
     function GetUsage : string;
     function GetVisible : boolean;
-
+    function GetExamples: TList<string>;
     function TryGetOption(const name : string; var option : IOptionDefinition) : boolean;
     procedure Clear;
     procedure GetAllRegisteredOptions(const list : TList<IOptionDefinition>);
@@ -43,7 +44,6 @@ type
   public
     constructor Create(const name : string; const alias : string; const usage : string; const description : string; const helpText : string; const visible : boolean; const isDefault : boolean = false);
     destructor Destroy;override;
-
   end;
 
 implementation
@@ -88,6 +88,7 @@ begin
   FOptionsLookup      := TDictionary<string,IOptionDefinition>.Create;
   FUnnamedOptions     := TList<IOptionDefinition>.Create;
   FRegisteredOptions  := TList<IOptionDefinition>.Create;
+  FExamples           := TList<string>.Create;
 end;
 
 destructor TCommandDefImpl.Destroy;
@@ -159,6 +160,11 @@ end;
 function TCommandDefImpl.GetDescription: string;
 begin
   result := FDescription;
+end;
+
+function TCommandDefImpl.GetExamples: TList<string>;
+begin
+  result := FExamples;
 end;
 
 function TCommandDefImpl.GetHelpText: string;

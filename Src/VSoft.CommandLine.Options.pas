@@ -104,6 +104,7 @@ type
     function GetUsage : string;
     function GetVisible : boolean;
     function GetIsDefault : boolean;
+    function GetExamples : TList<string>;
     procedure AddOption(const value : IOptionDefinition);
     function TryGetOption(const name : string; var option : IOptionDefinition) : boolean;
     function HasOption(const name : string) : boolean;
@@ -120,6 +121,7 @@ type
     property RegisteredOptions : TList<IOptionDefinition> read GetRegisteredOptions;
     property RegisteredUnamedOptions : TList<IOptionDefinition> read GetUnNamedOptions;
     property Visible : boolean read GetVisible;
+    property Examples : TList<string> read GetExamples;
   end;
 
   //Using a record here because non generic interfaces cannot have generic methods!! Still!
@@ -131,6 +133,7 @@ type
     function GetDescription : string;
     function GetUsage : string;
     function GetAlias : string;
+    function GetExamples : TList<string>;
   public
     function RegisterOption<T>(const longName: string; const Action : TConstProc<T>) : IOptionDefinition;overload;
     function RegisterOption<T>(const longName: string; const shortName : string; const Action : TConstProc<T>) : IOptionDefinition;overload;
@@ -143,6 +146,7 @@ type
     property Alias : string read GetAlias;
     property Description : string read GetDescription;
     property Usage : string read GetUsage;
+    property Examples : TList<string> read GetExamples;
 
   end;
 
@@ -330,6 +334,7 @@ class procedure TOptionsRegistry.PrintUsage(const command: ICommandDefinition; c
 var
   maxDescW : integer;
   exeName : string;
+  i: Integer;
 begin
   exeName := ChangeFileExt(ExtractFileName(ParamStr(0)), '').ToLower();
   if not command.IsDefault then
@@ -397,8 +402,17 @@ begin
         end;
         proc('');
       end;
-
     end);
+  if command.Examples.Count > 0 then
+  begin
+    proc('');
+    proc('Examples :');
+    for i := 0 to command.Examples.Count - 1 do
+    begin
+      proc('');
+      proc('  ' + exeName + ' ' + command.Examples.Items[i]);
+    end;
+  end;
 
 end;
 
@@ -472,6 +486,7 @@ begin
         for i := 1 to numDescStrings -1 do
           proc(PadRight('', descriptionTab) + descStrings[i]);
       end;
+      proc('');
     end;
     PrintUsage(FDefaultCommand.FCommandDef,proc);
   end
@@ -544,6 +559,11 @@ end;
 function TCommandDefinition.GetDescription: string;
 begin
   result := FCommandDef.Description;
+end;
+
+function TCommandDefinition.GetExamples: TList<string>;
+begin
+  result := FCommandDef.Examples;
 end;
 
 function TCommandDefinition.GetName: string;

@@ -37,7 +37,8 @@ begin
                   end);
   option.Required := true;
 
-
+  cmd.Examples.Add('install -installpath="c:\program files"');
+  cmd.Examples.Add('install -i="c:\temp"');
 end;
 
 
