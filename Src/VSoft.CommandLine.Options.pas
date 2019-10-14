@@ -147,6 +147,7 @@ type
     property Description : string read GetDescription;
     property Usage : string read GetUsage;
     property Examples : TList<string> read GetExamples;
+    property Command : ICommandDefinition read FCommandDef;
 
   end;
 
@@ -335,6 +336,7 @@ var
   maxDescW : integer;
   exeName : string;
   i: Integer;
+  printOption : TConstProc<IOptionDefinition>;
 begin
   exeName := ChangeFileExt(ExtractFileName(ParamStr(0)), '').ToLower();
   if not command.IsDefault then
@@ -364,45 +366,51 @@ begin
 
   maxDescW := maxDescW - FDescriptionTab;
 
-  command.EmumerateCommandOptions(
-    procedure(const opt : IOptionDefinition)
-    var
-       descStrings : TArray<string>;
-       i : integer;
-       numDescStrings : integer;
-       s  : string;
-    begin
-      s := WrapText(opt.HelpText, sLineBreak, [' ', '-', #9, ','],  maxDescW -1);
+  printOption :=  procedure(const opt : IOptionDefinition)
+                  var
+                     descStrings : TArray<string>;
+                     i : integer;
+                     numDescStrings : integer;
+                     s  : string;
+                  begin
+                    s := WrapText(opt.HelpText, sLineBreak, [' ', '-', #9, ','],  maxDescW -1);
 
-      descStrings := s.Split([sLineBreak], TStringSplitOptions.None);
-      for i := 0 to length(descStrings) -1 do
-        descStrings[i] := Trim(descStrings[i]);
+                    descStrings := s.Split([sLineBreak], TStringSplitOptions.None);
+                    for i := 0 to length(descStrings) -1 do
+                      descStrings[i] := Trim(descStrings[i]);
 
-      if opt.IsUnnamed then
-        s := ' <' + opt.ShortName + '>'
-      else
-      begin
-        s := ' -' + opt.LongName;
-        if opt.ShortName <> '' then
-          s := s + '|-' + opt.ShortName ;
-      end;
+                    if opt.IsUnnamed then
+                      s := ' <' + opt.ShortName + '>'
+                    else
+                    begin
+                      s := ' -' + opt.LongName;
+                      if opt.ShortName <> '' then
+                        s := s + '|-' + opt.ShortName ;
+                    end;
 
-      if opt.HasValue then
-        s := s + FNameValueSeparator + '<' + opt.LongName + '>';
-      s := PadRight(s, FDescriptionTab);
-      s := s + descStrings[0];
-      proc(s);
-      numDescStrings := Length(descStrings);
-      if numDescStrings > 1 then
-      begin
-        for i := 1 to numDescStrings -1 do
-        begin
-          s := PadLeft(descStrings[i], FDescriptionTab);
-          proc(s);
-        end;
-        proc('');
-      end;
-    end);
+                    if opt.HasValue then
+                      s := s + FNameValueSeparator + '<' + opt.LongName + '>';
+                    s := PadRight(s, FDescriptionTab);
+                    s := s + descStrings[0];
+                    proc(s);
+                    numDescStrings := Length(descStrings);
+                    if numDescStrings > 1 then
+                    begin
+                      for i := 1 to numDescStrings -1 do
+                      begin
+                        s := PadLeft(descStrings[i], FDescriptionTab);
+                        proc(s);
+                      end;
+                      proc('');
+                    end;
+                  end;
+
+  command.EmumerateCommandOptions(printOption);
+
+  if not command.IsDefault then
+    FDefaultCommand.command.EmumerateCommandOptions(printOption);
+
+
   if command.Examples.Count > 0 then
   begin
     proc('');
@@ -413,6 +421,9 @@ begin
       proc('  ' + exeName + ' ' + command.Examples.Items[i]);
     end;
   end;
+
+
+
 
 end;
 
