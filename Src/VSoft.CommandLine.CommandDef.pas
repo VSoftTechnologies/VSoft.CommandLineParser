@@ -93,6 +93,7 @@ end;
 
 destructor TCommandDefImpl.Destroy;
 begin
+  FExamples.Free;
   FOptionsLookup.Free;
   FUnnamedOptions.Free;
   FRegisteredOptions.Free;
