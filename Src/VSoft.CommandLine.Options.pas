@@ -348,7 +348,7 @@ begin
     if command.HelpText <> '' then
     begin
       proc('');
-      proc('   ' + command.HelpText);
+      proc(command.HelpText);
     end;
     proc('');
     proc('Options:');
@@ -390,6 +390,11 @@ begin
 
                     if opt.HasValue then
                       s := s + FNameValueSeparator + '<' + opt.LongName + '>';
+                    if opt.AllowMultiple then
+                      s := s + ' +'
+                    else
+                      s := s + '  ';
+
                     s := PadRight(s, FDescriptionTab);
                     s := s + descStrings[0];
                     proc(s);
