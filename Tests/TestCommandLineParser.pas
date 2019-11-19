@@ -101,6 +101,8 @@ type
   [Test]
   procedure Can_Parse_SpaceNameValueSeparator;
 
+  [Test]
+  procedure Test_String_Split;
 
   end;
 
@@ -108,6 +110,7 @@ implementation
 
 uses
   Classes,
+  VSoft.CommandLine.Utils,
   VSoft.CommandLine.OptionDef;
 
 { TCommandLineParserTests }
@@ -393,6 +396,18 @@ begin
   Assert.IsTrue(result);
 
 
+end;
+
+procedure TCommandLineParserTests.Test_String_Split;
+const
+  s : string = 'Hello' + #13#10 + 'World' + #13#10;
+var
+  values : TArray<string>;
+begin
+  values := TStringUtils.Split(s, #13#10);
+  Assert.AreEqual(2, length(values));
+  Assert.AreEqual('hello', values[0]);
+  Assert.AreEqual('world', values[1]);
 end;
 
 procedure TCommandLineParserTests.Will_Generate_Error_For_Extra_Unamed_Parameter;

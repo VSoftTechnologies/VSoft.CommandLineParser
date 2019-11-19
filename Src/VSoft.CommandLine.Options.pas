@@ -229,7 +229,7 @@ var
 begin
   cmdDef := TCommandDefImpl.Create(name,alias, usage, description, helpString,visible);
   result := TCommandDefinition.Create(cmdDef);
-  FCommandDefs.Add(name.ToLower,cmdDef);
+  FCommandDefs.Add(LowerCase(name),cmdDef);
 end;
 
 
@@ -259,7 +259,7 @@ end;
 class function TOptionsRegistry.GetCommandByName(const name: string): ICommandDefinition;
 begin
   result := nil;
-  FCommandDefs.TryGetValue(name.ToLower,Result);
+  FCommandDefs.TryGetValue(LowerCase(name), Result);
 
 end;
 
@@ -280,7 +280,7 @@ class procedure TOptionsRegistry.EmumerateCommandOptions(const commandName: stri
 var
   cmd : ICommandDefinition;
 begin
-  if not FCommandDefs.TryGetValue(commandName.ToLower,cmd) then
+  if not FCommandDefs.TryGetValue(LowerCase(commandName), cmd) then
     raise Exception.Create('Unknown command : ' + commandName);
 
   cmd.EmumerateCommandOptions(proc);
@@ -338,7 +338,7 @@ var
   i: Integer;
   printOption : TConstProc<IOptionDefinition>;
 begin
-  exeName := ChangeFileExt(ExtractFileName(ParamStr(0)), '').ToLower();
+  exeName := LowerCase(ChangeFileExt(ExtractFileName(ParamStr(0)), ''));
   if not command.IsDefault then
   begin
     proc('');
@@ -375,7 +375,7 @@ begin
                   begin
                     s := WrapText(opt.HelpText, sLineBreak, [' ', '-', #9, ','],  maxDescW -1);
 
-                    descStrings := s.Split([sLineBreak], TStringSplitOptions.None);
+                    descStrings := TStringUtils.Split(s, sLineBreak);
                     for i := 0 to length(descStrings) -1 do
                       descStrings[i] := Trim(descStrings[i]);
 
@@ -468,7 +468,7 @@ var
   exeName : string;
 begin
   proc('');
-  exeName := ChangeFileExt(ExtractFileName(ParamStr(0)), '').ToLower();
+  exeName := LowerCase(ChangeFileExt(ExtractFileName(ParamStr(0)), ''));
 
   //if we have more than 1 command then we are using command mode
   if FCommandDefs.Count > 0 then
@@ -494,7 +494,7 @@ begin
         continue;
 
       s := WrapText(cmd.Description,maxDescW);
-      descStrings := s.Split([sLineBreak], TStringSplitOptions.None);
+      descStrings := TStringUtils.Split(s, sLineBreak);
       proc(' ' + PadRight(cmd.Name, descriptionTab -1) + descStrings[0]);
       numDescStrings := Length(descStrings);
       if numDescStrings > 1 then
