@@ -316,7 +316,7 @@ begin
     begin
       if not (option as IOptionDefInvoke).WasFound then
       begin
-        parseResult.AddError('Required Option [' + option.LongName + '] was not specified');
+        parseResult.AddError('Required option [' + option.LongName + '] was not specified');
       end;
     end;
   end;
@@ -327,7 +327,7 @@ begin
     begin
       if not (option as IOptionDefInvoke).WasFound then
       begin
-        parseResult.AddError('Missing required unnamed parameter(s)');
+        parseResult.AddError('Required parameter <' + option.ShortName + '> was not specified');
         Break;
       end;
     end;
@@ -335,13 +335,25 @@ begin
 
   if parseResult.command <> nil then
   begin
+    for option in parseResult.command.RegisteredUnamedOptions do
+    begin
+      if option.Required then
+      begin
+        if not (option as IOptionDefInvoke).WasFound then
+        begin
+          parseResult.AddError('Required parameter <' + option.ShortName + '> was not specified');
+          Break;
+        end;
+      end;
+    end;
+
     for option in parseResult.command.RegisteredOptions do
     begin
       if option.Required then
       begin
         if not (option as IOptionDefInvoke).WasFound then
         begin
-          parseResult.AddError('Required Option [' + option.LongName + '] was not specified');
+          parseResult.AddError('Required option [' + option.LongName + '] was not specified');
         end;
       end;
     end;
