@@ -341,7 +341,6 @@ begin
   exeName := LowerCase(ChangeFileExt(ExtractFileName(ParamStr(0)), ''));
   if not command.IsDefault then
   begin
-    proc('');
     proc('Usage: ' + exeName + ' ' + command.Usage);
     proc('');
     proc(command.Description);
