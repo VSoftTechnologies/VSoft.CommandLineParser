@@ -556,10 +556,10 @@ begin
     raise Exception.Create('Name required - use RegisterUnamed to register unamed options');
 
   if FCommandDef.HasOption(LowerCase(longName)) then
-    raise Exception.Create('Option : ' + longName + 'already registered');
+    raise Exception.Create('Option [' + longName + '] already registered on command [' + FCommandDef.Name + ']');
 
   if FCommandDef.HasOption(LowerCase(shortName)) then
-    raise Exception.Create('Option : ' + shortName + 'already registered');
+    raise Exception.Create('Option [' + shortName + '] already registered on command [' + FCommandDef.Name + ']');
 
   result := TOptionDefinition<T>.Create(longName,shortName,Action);
 
