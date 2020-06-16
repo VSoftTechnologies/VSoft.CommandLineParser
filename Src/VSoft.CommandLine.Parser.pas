@@ -144,7 +144,10 @@ begin
     bUseKey := false;
     value := values.Strings[i];
     if value = '' then
+    begin
+      Inc(i);
       continue;
+    end;
     if StartsStr('--',value)  then
       Delete(value,1,2)
     else if StartsStr('-',value)  then
