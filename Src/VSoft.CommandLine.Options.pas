@@ -451,7 +451,7 @@ end;
 
 function compareKey(const L, R: String): Integer;
 begin
-  Result := SysUtils.CompareText(L, R);
+  Result := CompareText(L, R);
 end;
 
 class procedure TOptionsRegistry.PrintUsage(const proc: TConstProc<string>; const printDefaultUsage : boolean);
