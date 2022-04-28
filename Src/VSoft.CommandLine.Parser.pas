@@ -303,6 +303,7 @@ var
 begin
   sList := TStringList.Create;
   try
+    sList.LoadFromFile(fileName);
     InternalParse(sList,parseResult);
   finally
     sList.Free;
