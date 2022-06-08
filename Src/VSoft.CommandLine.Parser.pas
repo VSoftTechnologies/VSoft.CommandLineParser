@@ -197,6 +197,12 @@ begin
             value := ''
           else
             Inc(i);
+        end
+        else
+        begin
+          //the last option with no value just a key
+          key := value;
+          value := '';
         end;
       end
       else
