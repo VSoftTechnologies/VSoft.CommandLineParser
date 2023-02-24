@@ -38,8 +38,8 @@ type
     function TryGetOption(const name : string; var option : IOptionDefinition) : boolean;
     procedure Clear;
     procedure GetAllRegisteredOptions(const list : TList<IOptionDefinition>);
-    procedure EmumerateCommandOptions(const proc : TConstProc<string,string, string>);overload;
-    procedure EmumerateCommandOptions(const proc : TConstProc<IOptionDefinition>);overload;
+    procedure EnumerateCommandOptions(const proc : TConstProc<string,string, string>);overload;
+    procedure EnumerateCommandOptions(const proc : TConstProc<IOptionDefinition>);overload;
 
   public
     constructor Create(const name : string; const alias : string; const usage : string; const description : string; const helpText : string; const visible : boolean; const isDefault : boolean = false);
@@ -100,7 +100,7 @@ begin
   inherited;
 end;
 
-procedure TCommandDefImpl.EmumerateCommandOptions(const proc: TConstProc<IOptionDefinition>);
+procedure TCommandDefImpl.EnumerateCommandOptions(const proc: TConstProc<IOptionDefinition>);
 var
   optionList : TList<IOptionDefinition>;
   opt : IOptionDefinition;
@@ -117,13 +117,16 @@ begin
       end));
 
     for opt in optionList do
-      proc(opt);
+    begin
+      if not opt.Hidden then
+        proc(opt);
+    end;
   finally
     optionList.Free;
   end;
 end;
 
-procedure TCommandDefImpl.EmumerateCommandOptions(const proc: TConstProc<string, string, string>);
+procedure TCommandDefImpl.EnumerateCommandOptions(const proc: TConstProc<string, string, string>);
 var
   optionList : TList<IOptionDefinition>;
   opt : IOptionDefinition;
@@ -140,7 +143,10 @@ begin
       end));
 
     for opt in optionList do
-      proc(opt.LongName,opt.ShortName, opt.HelpText);
+    begin
+      if not opt.Hidden then
+        proc(opt.LongName,opt.ShortName, opt.HelpText);
+    end;
   finally
     optionList.Free;
   end;

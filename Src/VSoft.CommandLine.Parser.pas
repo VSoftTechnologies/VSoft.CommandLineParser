@@ -63,6 +63,7 @@ type
   private
     FUnamedIndex : integer;
     FNameValueSeparator: string;
+    FCurrentCommand : ICommandDefinition;
   protected
     procedure InternalValidate(const parseResult: IInternalParseResult);
 
@@ -121,9 +122,7 @@ var
   value : string;
   key : string;
   option : IOptionDefinition;
-  currentCommand : ICommandDefinition;
   newCommand     : ICommandDefinition;
-  defaultCommand : ICommandDefinition;
   bTryValue : boolean;
   bUseKey : boolean;
 
@@ -133,8 +132,7 @@ var
   end;
 
 begin
-  defaultCommand := TOptionsRegistry.DefaultCommand;
-  currentCommand := defaultCommand;
+
 
   i := 0;
   while i < values.Count do
@@ -157,19 +155,19 @@ begin
     else if StartsStr('@',value)  then
       Delete(value,1,1)
     //if command name = '' then it's the default;
-    else if (currentCommand.Name = '') and TOptionsRegistry.RegisteredCommands.TryGetValue(LowerCase(value),newCommand) then
+    else if (FCurrentCommand.Name = '') and TOptionsRegistry.RegisteredCommands.TryGetValue(LowerCase(value),newCommand) then
     begin
-      currentCommand := newCommand;
+      FCurrentCommand := newCommand;
       newCommand := nil;
       //switching commands
-      parseResult.SetCommand(currentCommand);
+      parseResult.SetCommand(FCurrentCommand);
       FUnamedIndex := 0;
       Inc(i);
       continue;
     end
-    else if FUnamedIndex < currentCommand.RegisteredUnamedOptions.Count  then
+    else if FUnamedIndex < FCurrentCommand.RegisteredUnamedOptions.Count  then
     begin
-      option := currentCommand.RegisteredUnamedOptions.Items[FUnamedIndex];
+      option := FCurrentCommand.RegisteredUnamedOptions.Items[FUnamedIndex];
       Inc(FUnamedIndex);
       bTryValue := false;
       bUseKey := True;
@@ -238,12 +236,12 @@ begin
     if option = nil then
     begin
 
-      if not currentCommand.TryGetOption(LowerCase(key), option) then
+      if not FCurrentCommand.TryGetOption(LowerCase(key), option) then
       begin
-        if currentCommand <> defaultCommand then
+        if FCurrentCommand <> TOptionsRegistry.DefaultCommand then
         begin
           //last resort to find an option.
-          defaultCommand.TryGetOption(LowerCase(key), option)
+          TOptionsRegistry.DefaultCommand.TryGetOption(LowerCase(key), option)
         end;
       end;
     end;
@@ -373,6 +371,7 @@ end;
 
 function TCommandLineParser.Parse(const values: TStrings): ICommandLineParseResult;
 begin
+  FCurrentCommand := TOptionsRegistry.DefaultCommand;
   result := TCommandLineParseResult.Create;
   InternalParse(values,result as IInternalParseResult);
   InternalValidate(result as IInternalParseResult);
@@ -383,6 +382,7 @@ var
   sList : TStringList;
   i     : integer;
 begin
+  FCurrentCommand := TOptionsRegistry.DefaultCommand;
   sList := TStringList.Create;
   try
     if ParamCount > 0 then
