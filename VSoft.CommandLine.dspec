@@ -1,10 +1,11 @@
 {
   "metadata": {
     "id": "VSoft.CommandLine",
-    "version": "0.1.4",
+    "version": "0.1.5",
     "description": "Command Line Parser",
     "authors": "Vincent Parrett",
     "projectUrl": "https://github.com/VSoftTechnologies/VSoft.CommandLineParser",
+    "repositoryUrl": "https://github.com/VSoftTechnologies/VSoft.CommandLineParser",
     "license": "Apache-2.0",
     "copyright": "Vincent Parrett and contributors",
     "tags": "commandline parser"
