@@ -1,7 +1,7 @@
 {
   "metadata": {
     "id": "VSoft.CommandLine",
-    "version": "0.1.5",
+    "version": "0.1.6",
     "description": "Command Line Parser",
     "authors": "Vincent Parrett",
     "projectUrl": "https://github.com/VSoftTechnologies/VSoft.CommandLineParser",
@@ -73,6 +73,11 @@
     },
     {
       "compiler": "11.0",
+      "platforms": "Win32, Win64",
+      "template": "default"
+    },
+    {
+      "compiler": "12.0",
       "platforms": "Win32, Win64",
       "template": "default"
     }
