@@ -345,7 +345,7 @@ begin
                       s := s + '  ';
                     s := PadRight(s, FDescriptionTab);
                     numDescStrings := Length(descStrings);
-                    if numDescStrings > 1 then
+                    if numDescStrings > 0 then
                       s := s + descStrings[0];
                     proc(s);
                     if numDescStrings > 1 then
