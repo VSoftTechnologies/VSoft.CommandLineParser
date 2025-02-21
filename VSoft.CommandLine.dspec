@@ -1,7 +1,7 @@
 {
   "metadata": {
     "id": "VSoft.CommandLine",
-    "version": "0.1.6",
+    "version": "0.1.7",
     "description": "Command Line Parser",
     "authors": "Vincent Parrett",
     "projectUrl": "https://github.com/VSoftTechnologies/VSoft.CommandLineParser",
