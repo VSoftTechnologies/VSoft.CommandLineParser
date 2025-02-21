@@ -83,5 +83,11 @@ begin
   //TODO : Find a way to get the console width on osx
 end;
 {$ENDIF}
-
+{$IFDEF LINUX64}
+function GetConsoleWidth : integer;
+begin
+  result := 80;
+  //TODO : Find a way to get the console width on linux
+end;
+{$ENDIF}
 end.
