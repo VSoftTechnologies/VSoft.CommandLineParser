@@ -1,7 +1,7 @@
 {
   "metadata": {
     "id": "VSoft.CommandLine",
-    "version": "0.1.7",
+    "version": "0.1.8",
     "description": "Command Line Parser",
     "authors": "Vincent Parrett",
     "projectUrl": "https://github.com/VSoftTechnologies/VSoft.CommandLineParser",
@@ -79,7 +79,7 @@
     {
       "compiler": "12.0",
       "platforms": "Win32, Win64",
-      "template": "default"
+      "template": "12plus"
     }
   ],
   "templates": [
@@ -108,6 +108,33 @@
           "project": ".\\packages\\Rad Studio $compilerWithCodeName$\\VSoft.CommandLineR.dproj"
         }
       ]
+    },
+    {
+      "name": "12plus",
+      "source": [
+        {
+          "src": "src\\**.pas",
+          "flatten": true,
+          "dest": "src"
+        },
+        {
+           "src":"packages\\Rad Studio $Compiler$\\*.dp*",
+           "exclude": ["*.dproj.local"],
+           "dest":"packages\\Rad Studio $Compiler$"
+          }
+      ],
+      "searchPaths": [
+        {
+          "path": "src"
+        }
+      ],
+      "build": [
+        {
+          "id": "Runtime",
+          "project": ".\\packages\\Rad Studio $compilerWithCodeName$\\VSoft.CommandLineR.dproj"
+        }
+      ]
     }
+  
   ]
 }
