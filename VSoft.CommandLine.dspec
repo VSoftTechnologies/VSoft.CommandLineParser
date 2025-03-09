@@ -1,7 +1,7 @@
 {
   "metadata": {
     "id": "VSoft.CommandLine",
-    "version": "0.1.8",
+    "version": "0.1.9",
     "description": "Command Line Parser",
     "authors": "Vincent Parrett",
     "projectUrl": "https://github.com/VSoftTechnologies/VSoft.CommandLineParser",
@@ -131,7 +131,7 @@
       "build": [
         {
           "id": "Runtime",
-          "project": ".\\packages\\Rad Studio $compilerWithCodeName$\\VSoft.CommandLineR.dproj"
+          "project": ".\\packages\\Rad Studio $compiler$\\VSoft.CommandLineR.dproj"
         }
       ]
     }
