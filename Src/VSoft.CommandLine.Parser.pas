@@ -168,7 +168,8 @@ begin
     else if FUnamedIndex < FCurrentCommand.RegisteredUnamedOptions.Count  then
     begin
       option := FCurrentCommand.RegisteredUnamedOptions.Items[FUnamedIndex];
-      Inc(FUnamedIndex);
+      if not option.AllowMultiple then
+        Inc(FUnamedIndex);
       bTryValue := false;
       bUseKey := True;
     end
@@ -299,7 +300,8 @@ begin
 
     Inc(i);
   end;
-end;
+
+  end;
 
 procedure TCommandLineParser.InternalParseFile(const fileName: string; const parseResult: IInternalParseResult);
 var
