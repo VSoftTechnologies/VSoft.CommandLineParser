@@ -1,140 +1,151 @@
 {
-  "metadata": {
-    "id": "VSoft.CommandLine",
-    "version": "0.1.9",
-    "description": "Command Line Parser",
-    "authors": "Vincent Parrett",
-    "projectUrl": "https://github.com/VSoftTechnologies/VSoft.CommandLineParser",
-    "repositoryUrl": "https://github.com/VSoftTechnologies/VSoft.CommandLineParser",
-    "license": "Apache-2.0",
-    "copyright": "Vincent Parrett and contributors",
-    "tags": "commandline parser"
+ "metadata": {
+  "id": "VSoft.CommandLine",
+  "version": "0.1.10",
+  "description": "Command Line Parser",
+  "authors": "Vincent Parrett",
+  "projectUrl": "https://github.com/VSoftTechnologies/VSoft.CommandLineParser",
+  "repositoryUrl": "https://github.com/VSoftTechnologies/VSoft.CommandLineParser",
+  "license": "Apache-2.0",
+  "copyright": "Vincent Parrett and contributors",
+  "tags": "commandline parser",
+  "readme": "README.md"
+ },
+ "targetPlatforms": [
+  {
+   "compiler": "12.0",
+   "platforms": "Win32, Win64",
+   "template": "12plus"
   },
-  "targetPlatforms": [
+  {
+   "compiler": "11.0",
+   "platforms": "Win32, Win64",
+   "template": "default"
+  },
+  {
+   "compiler": "10.4",
+   "platforms": "Win32, Win64",
+   "template": "default"
+  },
+  {
+   "compiler": "10.3",
+   "platforms": "Win32, Win64",
+   "template": "default"
+  },
+  {
+   "compiler": "10.2",
+   "platforms": "Win32, Win64",
+   "template": "default"
+  },
+  {
+   "compiler": "10.1",
+   "platforms": "Win32, Win64",
+   "template": "default"
+  },
+  {
+   "compiler": "10.0",
+   "platforms": "Win32, Win64",
+   "template": "default"
+  },
+  {
+   "compiler": "XE8",
+   "platforms": "Win32, Win64",
+   "template": "default"
+  },
+  {
+   "compiler": "XE7",
+   "platforms": "Win32, Win64",
+   "template": "default"
+  },
+  {
+   "compiler": "XE6",
+   "platforms": "Win32, Win64",
+   "template": "default"
+  },
+  {
+   "compiler": "XE5",
+   "platforms": "Win32, Win64",
+   "template": "default"
+  },
+  {
+   "compiler": "XE4",
+   "platforms": "Win32, Win64",
+   "template": "default"
+  },
+  {
+   "compiler": "XE3",
+   "platforms": "Win32, Win64",
+   "template": "default"
+  },
+  {
+   "compiler": "XE2",
+   "platforms": "Win32, Win64",
+   "template": "default"
+  },
+  {
+   "compiler": "13.0",
+   "platforms": "Win32, Win64",
+   "template": "12plus"
+  }
+ ],
+ "templates": [
+  {
+   "name": "12plus",
+   "source": [
     {
-      "compiler": "XE2",
-      "platforms": "Win32, Win64",
-      "template": "default"
+     "src": "src\\**.pas",
+     "dest": "src",
+     "flatten": true
     },
     {
-      "compiler": "XE3",
-      "platforms": "Win32, Win64",
-      "template": "default"
-    },
-    {
-      "compiler": "XE4",
-      "platforms": "Win32, Win64",
-      "template": "default"
-    },
-    {
-      "compiler": "XE5",
-      "platforms": "Win32, Win64",
-      "template": "default"
-    },
-    {
-      "compiler": "XE6",
-      "platforms": "Win32, Win64",
-      "template": "default"
-    },
-    {
-      "compiler": "XE7",
-      "platforms": "Win32, Win64",
-      "template": "default"
-    },
-    {
-      "compiler": "XE8",
-      "platforms": "Win32, Win64",
-      "template": "default"
-    },
-    {
-      "compiler": "10.0",
-      "platforms": "Win32, Win64",
-      "template": "default"
-    },
-    {
-      "compiler": "10.1",
-      "platforms": "Win32, Win64",
-      "template": "default"
-    },
-    {
-      "compiler": "10.2",
-      "platforms": "Win32, Win64",
-      "template": "default"
-    },
-    {
-      "compiler": "10.3",
-      "platforms": "Win32, Win64",
-      "template": "default"
-    },
-    {
-      "compiler": "10.4",
-      "platforms": "Win32, Win64",
-      "template": "default"
-    },
-    {
-      "compiler": "11.0",
-      "platforms": "Win32, Win64",
-      "template": "default"
-    },
-    {
-      "compiler": "12.0",
-      "platforms": "Win32, Win64",
-      "template": "12plus"
+     "src": "packages\\Rad Studio $Compiler$\\*.dp*",
+     "dest": "packages\\Rad Studio $Compiler$",
+     "exclude": [
+      "*.dproj.local"
+     ]
     }
-  ],
-  "templates": [
+   ],
+   "searchPaths": [
     {
-      "name": "default",
-      "source": [
-        {
-          "src": "src\\**.pas",
-          "flatten": true,
-          "dest": "src"
-        },
-        {
-           "src":"packages\\Rad Studio $CompilerWithCodeName$\\*.dp*",
-           "exclude": ["*.dproj.local"],
-           "dest":"packages\\Rad Studio $CompilerWithCodeName$"
-          }
-      ],
-      "searchPaths": [
-        {
-          "path": "src"
-        }
-      ],
-      "build": [
-        {
-          "id": "Runtime",
-          "project": ".\\packages\\Rad Studio $compilerWithCodeName$\\VSoft.CommandLineR.dproj"
-        }
-      ]
+     "path": "src"
+    }
+   ],
+   "build": [
+    {
+     "id": "Runtime",
+     "project": ".\\packages\\Rad Studio $compiler$\\VSoft.CommandLineR.dproj",
+     "config": "Release"
+    }
+   ]
+  },
+  {
+   "name": "default",
+   "source": [
+    {
+     "src": "src\\**.pas",
+     "dest": "src",
+     "flatten": true
     },
     {
-      "name": "12plus",
-      "source": [
-        {
-          "src": "src\\**.pas",
-          "flatten": true,
-          "dest": "src"
-        },
-        {
-           "src":"packages\\Rad Studio $Compiler$\\*.dp*",
-           "exclude": ["*.dproj.local"],
-           "dest":"packages\\Rad Studio $Compiler$"
-          }
-      ],
-      "searchPaths": [
-        {
-          "path": "src"
-        }
-      ],
-      "build": [
-        {
-          "id": "Runtime",
-          "project": ".\\packages\\Rad Studio $compiler$\\VSoft.CommandLineR.dproj"
-        }
-      ]
+     "src": "packages\\Rad Studio $CompilerWithCodeName$\\*.dp*",
+     "dest": "packages\\Rad Studio $CompilerWithCodeName$",
+     "exclude": [
+      "*.dproj.local"
+     ]
     }
-  
-  ]
+   ],
+   "searchPaths": [
+    {
+     "path": "src"
+    }
+   ],
+   "build": [
+    {
+     "id": "Runtime",
+     "project": ".\\packages\\Rad Studio $compilerWithCodeName$\\VSoft.CommandLineR.dproj",
+     "config": "Release"
+    }
+   ]
+  }
+ ]
 }
