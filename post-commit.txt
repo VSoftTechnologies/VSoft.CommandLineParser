@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Post commit hook to force all .dspec files to always have current commit hash 
+# Post commit hook to force all .dspec and .dspec.yaml files to always have current commit hash
 
 # Color codes for output
 RED='\033[0;31m'
@@ -12,17 +12,17 @@ NC='\033[0m' # No Color
 # In this project
 SOURCE_FOLDER="./"
 
-echo -e "${YELLOW}Post-commit hook: Processing .dspec files in ${SOURCE_FOLDER} folder${NC}"
+echo -e "${YELLOW}Post-commit hook: Processing .dspec and .dspec.yaml files in ${SOURCE_FOLDER} folder${NC}"
 
-# Find all .dspec files in the Source folder
-DSPEC_FILES=$(find "$SOURCE_FOLDER" -name "*.dspec" -type f 2>/dev/null)
+# Find all .dspec and .dspec.yaml files in the Source folder
+DSPEC_FILES=$(find "$SOURCE_FOLDER" \( -name "*.dspec" -o -name "*.dspec.yaml" \) -type f 2>/dev/null)
 
 if [ -z "$DSPEC_FILES" ]; then
-    echo -e "${YELLOW}No .dspec files found in ${SOURCE_FOLDER} folder${NC}"
+    echo -e "${YELLOW}No .dspec or .dspec.yaml files found in ${SOURCE_FOLDER} folder${NC}"
     exit 0
 fi
 
-echo -e "${YELLOW}Found .dspec files:${NC}"
+echo -e "${YELLOW}Found files:${NC}"
 echo "$DSPEC_FILES" | while read -r file; do
     echo -e "  ${YELLOW}$file${NC}"
 done

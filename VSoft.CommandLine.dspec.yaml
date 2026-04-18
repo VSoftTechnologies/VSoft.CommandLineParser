@@ -1,0 +1,54 @@
+# DPM package spec file
+# Used to build packages
+
+min client version: 1.0
+# metadata describes the package to the user
+metadata:
+  id: VSoft.CommandLine
+  authors: [ Vincent Parrett ]
+  description: Command Line Parser
+  projectUrl: https://github.com/VSoftTechnologies/VSoft.CommandLineParser
+  repositoryUrl: https://github.com/VSoftTechnologies/VSoft.CommandLineParser
+  license: Apache-2.0
+  readme: README.md
+  copyright: Vincent Parrett and contributors
+  tags: [ commandline, parser ]
+  version: 0.1.11
+  repositoryCommit: Id:2380b6c25d9925b2280f7582e6b2eaaf49207da0
+
+# define variable defaults - can be overriden in targetPlatforms
+variables:
+  packageSource: "Rad Studio $compilernoprefix$"
+
+# package folder names are a mess. 
+targetPlatforms:
+  - compiler from: delphixe2
+    compiler to: delphixe8
+    platforms: [ win32, win64 ]
+  - compiler from: delphi10.0
+    compiler to: delphi10.4
+    platforms: [ win32, win64 ]
+    variables:
+      packageSource: "Rad Studio $compilernoprefix$ $compilerCodeName$"
+  - compilers: [ delphi11 ]
+    platforms: [ win32, win64 ]
+    variables:
+      packageSource: "Rad Studio $compilernoprefix$.0 $compilerCodeName$"
+  - compiler from: delphi12
+    compiler to: delphi13
+    platforms: [ win32, win64 ]
+    variables:
+      packageSource: "Rad Studio $compilernoprefix$.0"
+
+templates:
+  - name: default
+
+    source:
+      - src: ./LICENSE
+      - src: ./src/*.pas
+      - src: ./packages/$packageSource$/*.dpk
+        dest: ./packages/$packageSource$
+      - src: ./packages/$packageSource$/*.dproj
+        dest: ./packages/$packageSource$
+    build:
+      - project: ./packages/$packageSource$/VSoft.CommandLineR.dproj
