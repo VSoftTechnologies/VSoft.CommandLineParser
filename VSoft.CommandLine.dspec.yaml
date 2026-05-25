@@ -20,25 +20,10 @@ metadata:
 variables:
   packageSource: "Rad Studio $compilernoprefix$"
 
-# package folder names are a mess. 
 targetPlatforms:
   - compiler from: delphixe2
-    compiler to: delphixe8
+    compiler to: delphi13.0
     platforms: [ win32, win64 ]
-  - compiler from: delphi10.0
-    compiler to: delphi10.4
-    platforms: [ win32, win64 ]
-    variables:
-      packageSource: "Rad Studio $compilernoprefix$ $compilerCodeName$"
-  - compilers: [ delphi11 ]
-    platforms: [ win32, win64 ]
-    variables:
-      packageSource: "Rad Studio $compilernoprefix$.0 $compilerCodeName$"
-  - compiler from: delphi12
-    compiler to: delphi13
-    platforms: [ win32, win64 ]
-    variables:
-      packageSource: "Rad Studio $compilernoprefix$.0"
 
 templates:
   - name: default
