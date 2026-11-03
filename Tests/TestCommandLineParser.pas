@@ -104,6 +104,21 @@ type
   [Test]
   procedure Test_String_Split;
 
+  [Test]
+  procedure Can_Parse_Command_By_Name;
+
+  [Test]
+  procedure Can_Parse_Command_By_Alias;
+
+  [Test]
+  procedure Can_Parse_Command_By_Alias_Ignoring_Case;
+
+  [Test]
+  procedure Will_Prefer_Command_Name_Over_Alias;
+
+  [Test]
+  procedure Will_Generate_Error_For_Unknown_Command;
+
   end;
 
 implementation
@@ -114,6 +129,72 @@ uses
   VSoft.CommandLine.OptionDef;
 
 { TCommandLineParserTests }
+
+procedure TCommandLineParserTests.Can_Parse_Command_By_Alias;
+var
+  sList : TStringList;
+  parseResult : ICommandLineParseResult;
+begin
+  TOptionsRegistry.RegisterCommand('aliascommand','ac','a test command','','aliascommand [options]');
+  try
+    sList := TStringList.Create;
+    sList.Add('ac');
+    try
+      parseResult := TOptionsRegistry.Parse(sList);
+    finally
+      sList.Free;
+    end;
+    Assert.IsFalse(parseResult.HasErrors, parseResult.ErrorText);
+    Assert.AreEqual('aliascommand', parseResult.Command);
+  finally
+    TOptionsRegistry.Clear;
+  end;
+end;
+
+
+procedure TCommandLineParserTests.Can_Parse_Command_By_Alias_Ignoring_Case;
+var
+  sList : TStringList;
+  parseResult : ICommandLineParseResult;
+begin
+  TOptionsRegistry.RegisterCommand('aliascommand','ac','a test command','','aliascommand [options]');
+  try
+    sList := TStringList.Create;
+    sList.Add('AC');
+    try
+      parseResult := TOptionsRegistry.Parse(sList);
+    finally
+      sList.Free;
+    end;
+    Assert.IsFalse(parseResult.HasErrors, parseResult.ErrorText);
+    Assert.AreEqual('aliascommand', parseResult.Command);
+  finally
+    TOptionsRegistry.Clear;
+  end;
+end;
+
+
+procedure TCommandLineParserTests.Can_Parse_Command_By_Name;
+var
+  sList : TStringList;
+  parseResult : ICommandLineParseResult;
+begin
+  TOptionsRegistry.RegisterCommand('namedcommand','nc','a test command','','namedcommand [options]');
+  try
+    sList := TStringList.Create;
+    sList.Add('namedcommand');
+    try
+      parseResult := TOptionsRegistry.Parse(sList);
+    finally
+      sList.Free;
+    end;
+    Assert.IsFalse(parseResult.HasErrors, parseResult.ErrorText);
+    Assert.AreEqual('namedcommand', parseResult.Command);
+  finally
+    TOptionsRegistry.Clear;
+  end;
+end;
+
 
 procedure TCommandLineParserTests.Can_Parse_Enum_Parameter;
 var
@@ -471,6 +552,28 @@ begin
   Assert.IsTrue(parseResult.HasErrors);
 end;
 
+procedure TCommandLineParserTests.Will_Generate_Error_For_Unknown_Command;
+var
+  sList : TStringList;
+  parseResult : ICommandLineParseResult;
+begin
+  TOptionsRegistry.RegisterCommand('knowncommand','kc','a test command','','knowncommand [options]');
+  try
+    sList := TStringList.Create;
+    sList.Add('kcx');
+    try
+      parseResult := TOptionsRegistry.Parse(sList);
+    finally
+      sList.Free;
+    end;
+    Assert.IsTrue(parseResult.HasErrors);
+    Assert.AreEqual('', parseResult.Command);
+  finally
+    TOptionsRegistry.Clear;
+  end;
+end;
+
+
 procedure TCommandLineParserTests.Will_Generate_Error_For_Unknown_Option;
 var
   parseResult : ICommandLineParseResult;
@@ -487,6 +590,29 @@ begin
   Assert.IsTrue(parseResult.HasErrors);
 
 end;
+
+procedure TCommandLineParserTests.Will_Prefer_Command_Name_Over_Alias;
+var
+  sList : TStringList;
+  parseResult : ICommandLineParseResult;
+begin
+  TOptionsRegistry.RegisterCommand('first','second','a test command','','first [options]');
+  TOptionsRegistry.RegisterCommand('second','s','a test command','','second [options]');
+  try
+    sList := TStringList.Create;
+    sList.Add('second');
+    try
+      parseResult := TOptionsRegistry.Parse(sList);
+    finally
+      sList.Free;
+    end;
+    Assert.IsFalse(parseResult.HasErrors, parseResult.ErrorText);
+    Assert.AreEqual('second', parseResult.Command);
+  finally
+    TOptionsRegistry.Clear;
+  end;
+end;
+
 
 procedure TCommandLineParserTests.Will_Raise_For_Missing_Param_File;
 var
