@@ -84,25 +84,6 @@ uses
   StrUtils,
   SysUtils;
 
-function TryGetCommandByAlias(const alias : string; out command : ICommandDefinition) : boolean;
-var
-  cmd : ICommandDefinition;
-begin
-  result := false;
-  command := nil;
-  if alias = '' then
-    exit;
-  for cmd in TOptionsRegistry.RegisteredCommands.Values do
-  begin
-    if SameText(cmd.Alias, alias) then
-    begin
-      command := cmd;
-      result := true;
-      exit;
-    end;
-  end;
-end;
-
 procedure StripQuotes(var value : string);
 var
   l : integer;
@@ -174,8 +155,7 @@ begin
     else if StartsStr('@',value)  then
       Delete(value,1,1)
     //if command name = '' then it's the default;
-    else if (FCurrentCommand.Name = '') and (TOptionsRegistry.RegisteredCommands.TryGetValue(LowerCase(value),newCommand) or
-      TryGetCommandByAlias(value,newCommand)) then
+    else if (FCurrentCommand.Name = '') and TOptionsRegistry.TryGetCommand(value,newCommand) then
     begin
       FCurrentCommand := newCommand;
       newCommand := nil;

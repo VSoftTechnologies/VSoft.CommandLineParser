@@ -170,6 +170,8 @@ type
     class procedure EmumerateCommandOptions(const commandName : string; const proc : TConstProc<string,string, string>);overload;
     class procedure EmumerateCommandOptions(const commandName : string; const proc : TConstProc<IOptionDefinition>);overload;
     class function GetCommandByName(const name : string) : ICommandDefinition;
+    //looks up a command by name, then by alias - case insensitive.
+    class function TryGetCommand(const nameOrAlias : string; out command : ICommandDefinition) : boolean;
     class property NameValueSeparator: string read FNameValueSeparator write FNameValueSeparator;
     class property DescriptionTab : integer read FDescriptionTab write FDescriptionTab;
     class property DefaultCommand : ICommandDefinition read GetDefaultCommand;
@@ -227,7 +229,24 @@ end;
 class function TOptionsRegistry.GetCommandByName(const name: string): ICommandDefinition;
 begin
   result := nil;
-  FCommandDefs.TryGetValue(LowerCase(name), Result);
+  TryGetCommand(name, Result);
+end;
+class function TOptionsRegistry.TryGetCommand(const nameOrAlias: string; out command: ICommandDefinition): boolean;
+var
+  cmd : ICommandDefinition;
+begin
+  result := FCommandDefs.TryGetValue(LowerCase(nameOrAlias), command);
+  if result or (nameOrAlias = '') then
+    exit;
+  for cmd in FCommandDefs.Values do
+  begin
+    if SameText(cmd.Alias, nameOrAlias) then
+    begin
+      command := cmd;
+      result := true;
+      exit;
+    end;
+  end;
 end;
 class function TOptionsRegistry.GetDefaultCommand: ICommandDefinition;
 begin
@@ -244,7 +263,7 @@ class procedure TOptionsRegistry.EmumerateCommandOptions(const commandName: stri
 var
   cmd : ICommandDefinition;
 begin
-  if not FCommandDefs.TryGetValue(LowerCase(commandName), cmd) then
+  if not TryGetCommand(commandName, cmd) then
     raise Exception.Create('Unknown command : ' + commandName);
   cmd.EnumerateCommandOptions(proc);
 end;
@@ -385,7 +404,7 @@ begin
     PrintUsage(proc);
     exit;
   end;
-  if not FCommandDefs.TryGetValue(LowerCase(commandName),cmd) then
+  if not TryGetCommand(commandName,cmd) then
   begin
     proc('Unknown command : ' + commandName);
     exit;
@@ -540,7 +559,7 @@ class procedure TOptionsRegistry.EmumerateCommandOptions(const commandName: stri
 var
   cmd : ICommandDefinition;
 begin
-  if not FCommandDefs.TryGetValue(commandName,cmd) then
+  if not TryGetCommand(commandName,cmd) then
     raise Exception.Create('Unknown command : ' + commandName);
   cmd.EnumerateCommandOptions(proc);
 end;
