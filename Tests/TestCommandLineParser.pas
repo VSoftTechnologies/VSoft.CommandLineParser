@@ -117,6 +117,18 @@ type
   procedure Will_Prefer_Command_Name_Over_Alias;
 
   [Test]
+  procedure Can_Get_Command_By_Alias;
+
+  [Test]
+  procedure Can_Print_Usage_For_Command_By_Alias;
+
+  [Test]
+  procedure Can_Enumerate_Command_Options_By_Alias;
+
+  [Test]
+  procedure Can_Enumerate_Command_Options_Ignoring_Case;
+
+  [Test]
   procedure Will_Generate_Error_For_Unknown_Command;
 
   end;
@@ -168,6 +180,106 @@ begin
     end;
     Assert.IsFalse(parseResult.HasErrors, parseResult.ErrorText);
     Assert.AreEqual('aliascommand', parseResult.Command);
+  finally
+    TOptionsRegistry.Clear;
+  end;
+end;
+
+
+procedure TCommandLineParserTests.Can_Get_Command_By_Alias;
+var
+  cmd : ICommandDefinition;
+begin
+  TOptionsRegistry.RegisterCommand('aliascommand','ac','a test command','','aliascommand [options]');
+  try
+    cmd := TOptionsRegistry.GetCommandByName('AC');
+    Assert.IsNotNull(cmd, 'command not found by alias');
+    Assert.AreEqual('aliascommand', cmd.Name);
+  finally
+    TOptionsRegistry.Clear;
+  end;
+end;
+
+
+procedure TCommandLineParserTests.Can_Print_Usage_For_Command_By_Alias;
+var
+  byName : string;
+  byAlias : string;
+begin
+  TOptionsRegistry.RegisterCommand('aliascommand','ac','a test command','','aliascommand [options]');
+  try
+    byName := '';
+    byAlias := '';
+    TOptionsRegistry.PrintUsage('aliascommand',
+      procedure(const value : string)
+      begin
+        byName := byName + value + #13#10;
+      end);
+    TOptionsRegistry.PrintUsage('ac',
+      procedure(const value : string)
+      begin
+        byAlias := byAlias + value + #13#10;
+      end);
+    Assert.IsTrue(Pos('aliascommand [options]', byName) > 0, byName);
+    Assert.AreEqual(byName, byAlias);
+  finally
+    TOptionsRegistry.Clear;
+  end;
+end;
+
+
+procedure TCommandLineParserTests.Can_Enumerate_Command_Options_By_Alias;
+var
+  cmd : TCommandDefinition;
+  names : string;
+  defNames : string;
+begin
+  cmd := TOptionsRegistry.RegisterCommand('aliascommand','ac','a test command','','aliascommand [options]');
+  try
+    cmd.RegisterOption<boolean>('verbose','v','verbose output',nil);
+    names := '';
+    defNames := '';
+    Assert.WillNotRaise(
+      procedure
+      begin
+        TOptionsRegistry.EmumerateCommandOptions('ac',
+          procedure(const longName : string; const shortName : string; const helpText : string)
+          begin
+            names := names + longName + ';';
+          end);
+        TOptionsRegistry.EmumerateCommandOptions('ac',
+          procedure(const value : IOptionDefinition)
+          begin
+            defNames := defNames + value.LongName + ';';
+          end);
+      end);
+    Assert.AreEqual('verbose;', names);
+    Assert.AreEqual('verbose;', defNames);
+  finally
+    TOptionsRegistry.Clear;
+  end;
+end;
+
+
+procedure TCommandLineParserTests.Can_Enumerate_Command_Options_Ignoring_Case;
+var
+  cmd : TCommandDefinition;
+  defNames : string;
+begin
+  cmd := TOptionsRegistry.RegisterCommand('aliascommand','ac','a test command','','aliascommand [options]');
+  try
+    cmd.RegisterOption<boolean>('verbose','v','verbose output',nil);
+    defNames := '';
+    Assert.WillNotRaise(
+      procedure
+      begin
+        TOptionsRegistry.EmumerateCommandOptions('AliasCommand',
+          procedure(const value : IOptionDefinition)
+          begin
+            defNames := defNames + value.LongName + ';';
+          end);
+      end);
+    Assert.AreEqual('verbose;', defNames);
   finally
     TOptionsRegistry.Clear;
   end;
